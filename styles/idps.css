@@ -1,0 +1,52 @@
+#tooltip {
+	background-color: white;
+	opacity: 0.8;
+	border-radius: 10px;
+	-webkit-box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
+	-moz-box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
+	box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
+	pointer-events: none;
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+}
+
+.hidden{
+	display: none;
+}
+
+#posturas {
+	box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
+	width: 800px;
+	margin-left: 10px;
+	margin-top: 40px;
+}
+
+#mapa {
+	float: right;
+	box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
+	margin-right: 10px;
+}
+
+.yaxis path,
+.xaxis path,
+.yaxis line,
+.xaxis line{
+	fill:none;
+	stroke:#8c8989;
+	shape-rendering:crispEdges;
+}
+
+.yaxis text,
+.xaxis text{
+	font-family:sans-serif;
+	font-size: 12px;
+}
+
+#tristate{
+	margin-top: 15px;
+	position: absolute;
+	left: 105px;
+}
+
+img {
+	width: 100px;
+}
