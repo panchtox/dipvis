@@ -1,14 +1,13 @@
 library(pscl)
 library(RColorBrewer)
 
-years <- 2008:2013
+years <- 2007:2013
 meses <- 1:12
 sesiones <- read.csv("C:/Users/Alejandro/Desktop/votacion/output_ale.txt", encoding="latin-1")
 
 for (year in years) {
     #votos <- read.csv(paste('../output', year, '.csv', sep=""))
-    for (mes in meses) {
-      votos <- sesiones[sesiones$anio == year & sesiones$mes == mes,]
+      votos <- sesiones[sesiones$anio == year,]
       if ( dim(votos)[1] != 0 ) {
           nvotos <- dim(votos)[1]
           legis.names <- as.vector(unique(votos[,'legislador']))
@@ -46,7 +45,7 @@ for (year in years) {
                             notInLegis=notInLegis, legis.names=legis.names, vote.names=actas.names,
                             legis.data=legis.data, vote.data=NULL, desc=desc, source=fuente)
           
-          # El algoritmo de ideal points en sÃ?
+          # El algoritmo de ideal points en sÃ???
           fitted <- ideal(rData, normalize=FALSE)
           
           outcome <- fitted$xbar
@@ -54,12 +53,12 @@ for (year in years) {
             outcome <- -outcome
           }
           
-          write.table(outcome, file=paste('ideal_points_', year,'_',mes, '_sin_normalizar.csv', sep=''),
+          write.table(outcome, file=paste('ideal_points_', year, '_sin_normalizar.csv', sep=''),
                       col.names=FALSE, sep=',')
          
         }
     }
-}
+
 #     colores<-votos[row.names(unique(votos['legislador'])),'bloque']
 # 
 #     # GrÃ¡fico de ideal points creciente
