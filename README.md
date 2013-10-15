@@ -4,6 +4,7 @@
 
 	$ cd dipvis
 
+	$ git checkout tohtml
 
 	$ python -m SimpleHTTPServer 8888
 
