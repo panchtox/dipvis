@@ -4,7 +4,7 @@
 		<meta http-equiv="Content-Type" content="text/html; charset=ISO8859-1" />
 		<link rel="stylesheet" type="text/css" href="styles/menu.css">
 		<link rel="stylesheet" href="styles/idps.css">
-		<link rel="stylesheet" href="../styles/chosen.css">
+		<link rel="stylesheet" href="styles/chosen.css">
 		<script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
 		<script type="text/JavaScript" src="//ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
 		<script src="lib/jquery.sparkline.min.js"></script>
@@ -18,7 +18,7 @@
 /*
 *COMBO BOX
 */
-		d3.json("combo_nombres.json", function(json) {//trae el json con el listado de nombres con los id correspondientes
+		d3.json("data/combo_nombres.json", function(json) {//trae el json con el listado de nombres con los id correspondientes
 				nombres=json;	
 				for (i=0;i<nombres.length;i++){
 					$('<option/>').val(nombres[i].idip).html(nombres[i].nombre).appendTo('#diputados');
@@ -58,7 +58,7 @@
 /*
 *Curvas de Andrews de las posturas de los diputados
 */
-		d3.json("fideos_dips2.json", function(json) {//Trae los datos principales
+		d3.json("data/fideos_dips2.json", function(json) {//Trae los datos principales
 			dips=json.diputados;
 			dips.forEach(function(d){(d.points.forEach(function(y){ar.push(y.year)}))});//rango de anios
 			dips.forEach(function(d){(d.points.forEach(function(y){idps.push(y.idp)}))});//rango de puntos ideales
