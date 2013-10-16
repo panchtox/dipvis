@@ -1,3 +1,7 @@
+table{
+	margin-top: 10px;
+}
+
 #tooltip {
 	background-color: white;
 	opacity: 0.8;
@@ -15,13 +19,13 @@
 
 #posturas {
 	box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
-	width: 800px;
+	/*width: 800px;*/
 	margin-left: 10px;
-	margin-top: 40px;
+	margin-top: 0px;
 }
 
 #mapa {
-	float: right;
+	/*float: right;*/
 	box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
 	margin-right: 10px;
 }
@@ -33,6 +37,14 @@
 	fill:none;
 	stroke:#8c8989;
 	shape-rendering:crispEdges;
+}
+
+.ref text{
+	font-size: 12px;
+}
+
+.fondo1 text{
+	font-weight: bold;
 }
 
 .yaxis text,
