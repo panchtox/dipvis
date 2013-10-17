@@ -171,7 +171,7 @@
 	</head>
 	<body>
 		<ul class="menu">
-			<li><a href="diputados.html">Home</a></li>
+			<li><a href="index.html">Home</a></li>
 			<li><a>Posturas de voto</a>
 				<ul>
 					<li><a href="datosOriginales.html">Definici&oacute;n y datos originales</a></li>
@@ -189,7 +189,7 @@
 		</ul>
 		<table>
 			<tr>
-				<td style="padding-left:10px">
+				<td style="padding-left:10px" id="combo">
 					<div>
 						<select data-placeholder="Seleccione diputados de la lista..." class="chzn-select" multiple="multiple"  id="diputados" onChange="actualizarFideos();">
 							<option value=""></option>
@@ -224,6 +224,7 @@
 				
 			});
 		});
+		d3.select('#combo').style("width",w+"px");
 		/*
 		*La parte del mapa
 		*/
