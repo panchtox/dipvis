@@ -139,12 +139,12 @@
 			/*
 			* Referencia
 			*/
-				var ref={"posturas":[{"postura":"opositora","color":"#bbf098","yrel":1},{"postura":"variable","color":"#f0a198","yrel":2},{"postura":"oficialista","color":"#6b9eea","yrel":3}]},sbul=11;
+				var ref={"posturas":[{"postura":"opositora constante","color":"#bbf098","yrel":1},{"postura":"variable","color":"#f0a198","yrel":2},{"postura":"oficialista constante","color":"#6b9eea","yrel":3}]},sbul=11;
 				capaRef.selectAll('rect')
 					.data(ref.posturas)
 					.enter()
 					.append('rect')
-					.attr('x',w-100)
+					.attr('x',w-(w/5))
 					.attr('y',function(d){return h-90+(sbul*d.yrel);})
 					.attr('width',sbul-1)
 					.attr('height',sbul-1)
@@ -154,7 +154,7 @@
 					.enter()
 					.append('text')
 					.text(function(d){return d.postura})
-					.attr('x',w-88)
+					.attr('x',w-(w/5)+12)
 					.attr('y',function(d){return h-82+(sbul*d.yrel);});
 			/***/
 		});
