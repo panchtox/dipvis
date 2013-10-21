@@ -24,6 +24,14 @@ table{
 	margin-top: 0px;
 }
 
+.provincia {
+	fill: #405ac2;
+}
+
+.provincia.current {
+	fill: red;
+}
+
 .posturadip {
     
     stroke-width: 2;

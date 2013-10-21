@@ -99,19 +99,17 @@
 					var lineGraph = capa1.append("path")
 						.attr("d", linefunction(d.points))
 						.attr("class","posturadip " + posicion + " p" + d.distrito)
-						//.attr("stroke", d.col)
-						//.attr("color", d.col)
-						//.attr("stroke-width", 2)
 						.attr("shape-rendering","crispEdges")
-						//.attr("fill", "none")
 						.attr("id",("dip"+d.id))
 						.attr("nombre",d.nombre)
 						.attr("bloque",d.bloque)
 						.attr("foto",d.foto)
 						.attr("provincia",d.distrito)
 						.on("mouseover", function() {
-							console.log(d3.select(this).attr('class'));
-							d3.select(this).attr("stroke","red").attr("stroke-width",2);
+							
+							selectCurrent(d3.select(this));
+							selectCurrent(d3.selectAll("#p"+d3.select(this).attr("provincia")));
+							
 							d3.select("#tooltip")
 								.attr("class","")
 								.select("strong")
@@ -122,17 +120,16 @@
 							d3.select("#tooltip")
 								.select("img")
 								.attr("src",(d3.select(this).attr("foto")));
-							d3.selectAll("#p"+d3.select(this).attr("provincia"))
-								.style("fill","red");
+							
 							$('#tristate').sparkline(d.estados, {type:'tristate', posBarColor:'#9cab19',negBarColor:'#1e64cd'});
-							var sel = d3.select(this);
-							sel.moveToFront();
 						})
 						.on("mouseout", function() {
-							d3.select(this).attr("stroke",d.col).attr("stroke-width",2);
+							
+							unselectCurrent(d3.select(this));
+							unselectCurrent(d3.selectAll("#p"+d3.select(this).attr("provincia")));
+							
 							d3.select("#tooltip").attr("class","hidden");
-							d3.selectAll("#p"+d3.select(this).attr("provincia"))
-								.style("fill","#405ac2");
+
 						});
 				}
 			);
@@ -263,7 +260,7 @@
 					.append("path")
 					.attr("d", mappath)
 					.attr("id",function(d){return "p"+(d.properties.prov);})
-					.style("fill","#405ac2")
+					.attr("class","provincia")
 					.on("mouseover", onMouseOver)
 					.on("mouseout", onMouseOut);
 			});
@@ -275,39 +272,48 @@
 					.append("path")
 					.attr("d", mappath)
 					.attr("id",function(d){return "p"+(d.properties.prov);})
-					.style("fill","#405ac2")
+					.attr("class","provincia")
 					.on("mouseover", onMouseOver)
 					.on("mouseout", onMouseOut);
 			});
 
 			function onMouseOver() {
 				//Pintar provincia de rojo
-				d3.selectAll("#" + d3.select(this).attr("id"))
-					.style("fill","red");
+				var prov = d3.selectAll("#" + d3.select(this).attr("id"));
+				selectCurrent(prov);
 
 				//Agregar clase 'current'
 				var lines = d3.selectAll("." + d3.select(this).attr("id"));
-				lines.each(function(d,i) { 
-					var currClass = d3.select(this).attr("class");
-					d3.select(this).attr("class", currClass + " current");
-				});
+				selectCurrent(lines);
 
-				lines.moveToFront();				
+								
 			}
 
 			function onMouseOut() {
 				//Volver al color original
-				d3.selectAll("#" + d3.select(this).attr("id"))
-					.style("fill","#405ac2");
+				var prov = d3.selectAll("#" + d3.select(this).attr("id"));
+				unselectCurrent(prov);
 
 				//Remover classe 'current'
 				var lines = d3.selectAll("." + d3.select(this).attr("id"));
-				lines.each(function(d,i) { 
+				unselectCurrent(lines);				
+			}
+
+			function selectCurrent(selection){
+				selection.each(function(d,i) { 
+					var currClass = d3.select(this).attr("class");
+					d3.select(this).attr("class", currClass + " current");
+				});
+				selection.moveToFront();
+			}
+
+			function unselectCurrent(selection){
+				selection.each(function(d,i) { 
 					var currClass = d3.select(this).attr("class");
 					var prevClass = currClass.substring(0, currClass.length-8);
 					d3.select(this).attr("class", prevClass);
-				});				
-			}
+				});
+			}			
 		</script>
 	</body>
 	<script>
