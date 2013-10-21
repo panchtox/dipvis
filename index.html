@@ -33,7 +33,6 @@
 			
 			if (Dips.length) {
 				for (var i = 0; i < Dips.length; i++) {
-					console.log(d3.select("#" + Dips[i]));
 					d3.select("#" + Dips[i]).classed('disabled', false);
 					d3.select("#" + Dips[i]).classed('enabled', true);
 					d3.select("#" + Dips[i]).moveToFront();
@@ -115,7 +114,7 @@
 						.on("mouseover", function() {
 							selectCurrent(d3.select(this));
 							selectCurrent(d3.selectAll("#p"+d3.select(this).attr("provincia")));
-							d3.select("#tooltip").select("img").attr("src",""));
+							d3.select("#tooltip").select("img").attr("src","");
 							d3.select("#tooltip")
 								.attr("class","")
 								.select("strong")
