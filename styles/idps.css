@@ -26,6 +26,11 @@ table{
 
 .provincia {
 	fill: #405ac2;
+	pointer-events: auto;
+}
+
+.provincia.disabled {
+	pointer-events: none;
 }
 
 .provincia.current {

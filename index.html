@@ -29,6 +29,7 @@
 		function actualizarFideos() {//Destaca la linea de los diputados seleccionados en el combobox
 			var Dips = recuperar_seleccion('diputados');
 			d3.selectAll('.posturadip').classed('disabled', true);
+			d3.selectAll('.provincia').classed('disabled', true);
 			
 			if (Dips.length) {
 				for (var i = 0; i < Dips.length; i++) {
@@ -42,6 +43,7 @@
 				dips.forEach(
 					function(d){
 						d3.select("#dip"+d.id).classed('disabled', false);
+						d3.selectAll('.provincia').classed('disabled', false);
 						d3.select("#dip"+d.id).classed('enabled', false);
 					}
 				);
