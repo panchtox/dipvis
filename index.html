@@ -181,6 +181,14 @@
 					.attr("y2", idpsYscale(-0.02))
 					.attr("marker-start", "url(#triangle-start)")
 					.style("stroke","black");
+				capaFlechas.append('text')
+					.text('oposicion')
+					.attr('y',idpsYscale(2.3))
+					.attr('x',20);
+				capaFlechas.append('text')
+					.text('oficialismo')
+					.attr('y',idpsYscale(-2.3))
+					.attr('x',20);
 			/**/
 			/*
 			* Referencia
