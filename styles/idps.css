@@ -24,6 +24,30 @@ table{
 	margin-top: 0px;
 }
 
+.posturadip {
+    
+    stroke-width: 2;
+	fill: none;
+}
+
+.posturadip.oficialista {
+	stroke: #6b9eea;
+}
+.posturadip.opositora {
+	stroke: #bbf098;
+}
+.posturadip.variable {
+	stroke: #f0a198;
+}
+
+.posturadip.oficialista.current,
+.posturadip.opositora.current,
+.posturadip.variable.current
+ {
+    stroke: red;
+    stroke-width: 2;
+}
+
 #mapa {
 	/*float: right;*/
 	box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);

@@ -88,19 +88,29 @@
 
 			dips.forEach(
 				function(d){//fabricamos una linea por cada diputado, reflejando sus posturas en el tiempo
+					var posicion = 'variable';
+					if(d.col == '#bbf098'){
+						posicion = 'opositora';
+					}
+					if(d.col == '#6b9eea'){
+						posicion = 'oficialista';
+					}
+
 					var lineGraph = capa1.append("path")
 						.attr("d", linefunction(d.points))
-						.attr("class","posturadip")
-						.attr("stroke", d.col)
-						.attr("stroke-width", 2)
+						.attr("class","posturadip " + posicion + " p" + d.distrito)
+						//.attr("stroke", d.col)
+						//.attr("color", d.col)
+						//.attr("stroke-width", 2)
 						.attr("shape-rendering","crispEdges")
-						.attr("fill", "none")
+						//.attr("fill", "none")
 						.attr("id",("dip"+d.id))
 						.attr("nombre",d.nombre)
 						.attr("bloque",d.bloque)
 						.attr("foto",d.foto)
 						.attr("provincia",d.distrito)
 						.on("mouseover", function() {
+							console.log(d3.select(this).attr('class'));
 							d3.select(this).attr("stroke","red").attr("stroke-width",2);
 							d3.select("#tooltip")
 								.attr("class","")
@@ -253,7 +263,9 @@
 					.append("path")
 					.attr("d", mappath)
 					.attr("id",function(d){return "p"+(d.properties.prov);})
-					.style("fill","#405ac2");
+					.style("fill","#405ac2")
+					.on("mouseover", onMouseOver)
+					.on("mouseout", onMouseOut);
 			});
 
 			d3.json("maps/TIERRA DEL FUEGO.json", function(json) {//Aqui incorporamos T. del Fuego
@@ -263,8 +275,39 @@
 					.append("path")
 					.attr("d", mappath)
 					.attr("id",function(d){return "p"+(d.properties.prov);})
-					.style("fill","#405ac2");
+					.style("fill","#405ac2")
+					.on("mouseover", onMouseOver)
+					.on("mouseout", onMouseOut);
 			});
+
+			function onMouseOver() {
+				//Pintar provincia de rojo
+				d3.selectAll("#" + d3.select(this).attr("id"))
+					.style("fill","red");
+
+				//Agregar clase 'current'
+				var lines = d3.selectAll("." + d3.select(this).attr("id"));
+				lines.each(function(d,i) { 
+					var currClass = d3.select(this).attr("class");
+					d3.select(this).attr("class", currClass + " current");
+				});
+
+				lines.moveToFront();				
+			}
+
+			function onMouseOut() {
+				//Volver al color original
+				d3.selectAll("#" + d3.select(this).attr("id"))
+					.style("fill","#405ac2");
+
+				//Remover classe 'current'
+				var lines = d3.selectAll("." + d3.select(this).attr("id"));
+				lines.each(function(d,i) { 
+					var currClass = d3.select(this).attr("class");
+					var prevClass = currClass.substring(0, currClass.length-8);
+					d3.select(this).attr("class", prevClass);
+				});				
+			}
 		</script>
 	</body>
 	<script>
