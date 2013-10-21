@@ -113,10 +113,9 @@
 						.attr("foto",d.foto)
 						.attr("provincia",d.distrito)
 						.on("mouseover", function() {
-							
 							selectCurrent(d3.select(this));
 							selectCurrent(d3.selectAll("#p"+d3.select(this).attr("provincia")));
-							
+							d3.select("#tooltip").select("img").attr("src",""));
 							d3.select("#tooltip")
 								.attr("class","")
 								.select("strong")
