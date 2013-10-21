@@ -1,3 +1,4 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 	<head>
 		<meta http-equiv="Content-Type" content="text/html; charset=ISO8859-1" />
@@ -146,16 +147,67 @@
 				.attr("text-anchor", "middle")
 				.style("font-size", "16px")
 				.text("Postura de los diputados al votar los proyectos de ley durante el periodo 2006 - 2011");
+			/*
+			* Dibuja flechas del eje y
+			*/
+				var capaFlechas=svg.append("g").attr("class","flechas");
 
+				capaFlechas.append("marker")
+					.attr("id", "triangle-start")
+					.attr("viewBox", "0 0 10 10")
+					.attr("refX", 10)
+					.attr("refY", 5)
+					.attr("markerWidth", -6)
+					.attr("markerHeight", 6)
+					.attr("orient", "auto")
+					.append("path")
+					.attr("d", "M 0 0 L 10 5 L 0 10 z");
+
+				capaFlechas.append("marker")
+					.attr("id", "triangle-end")
+					.attr("viewBox", "0 0 10 10")
+					.attr("refX", 10)
+					.attr("refY", 5)
+					.attr("markerWidth", 6)
+					.attr("markerHeight", 6)
+					.attr("orient", "auto")
+					.append("path")
+					.attr("d", "M 0 0 L 10 5 L 0 10 z");
+
+				capaFlechas.append("line")
+					.attr("class", "arrow")
+					.attr("x1", 20)
+					.attr("x2", 20)
+					.attr("y1", idpsYscale(2.2))
+					.attr("y2", idpsYscale(0.02))
+					.attr("marker-start", "url(#triangle-start)")
+					.style("stroke","black");
+				capaFlechas.append("line")
+					.attr("class", "arrow")
+					.attr("x1", 20)
+					.attr("x2", 20)
+					.attr("y1", idpsYscale(-2.2))
+					.attr("y2", idpsYscale(-0.02))
+					.attr("marker-start", "url(#triangle-start)")
+					.style("stroke","black");
+				capaFlechas.append('text')
+					.text('oposicion')
+					.attr('y',idpsYscale(2.3))
+					.attr('x',20);
+				capaFlechas.append('text')
+					.text('oficialismo')
+					.attr('y',idpsYscale(-2.3))
+					.attr('x',20);
+			/**/
 			/*
 			* Referencia
 			*/
-				var ref={"posturas":[{"postura":"opositora","color":"#bbf098","yrel":1},{"postura":"variable","color":"#f0a198","yrel":2},{"postura":"oficialista","color":"#6b9eea","yrel":3}]},sbul=11;
+				var ref={"posturas":[{"postura":"opositora constante","color":"#bbf098","yrel":1},{"postura":"variable","color":"#f0a198","yrel":2},{"postura":"oficialista constante","color":"#6b9eea","yrel":3}]},sbul=11;
 				capaRef.selectAll('rect')
 					.data(ref.posturas)
 					.enter()
 					.append('rect')
-					.attr('x',w-100)
+					.attr('x',w-(w/5))
 					.attr('y',function(d){return h-90+(sbul*d.yrel);})
 					.attr('width',sbul-1)
 					.attr('height',sbul-1)
@@ -165,11 +217,12 @@
 					.enter()
 					.append('text')
 					.text(function(d){return d.postura})
-					.attr('x',w-88)
+					.attr('x',w-(w/5)+12)
 					.attr('y',function(d){return h-82+(sbul*d.yrel);});
 			/***/
 		});
 
+/* Funcion que permite que un objeto pase al frente de la imagen */
 		d3.selection.prototype.moveToFront = function() {//metodo que hace que un objeto pase al frente de la imagen -CREDITO
 				return this.each(function() { 
 					this.parentNode.appendChild(this); 
@@ -256,8 +309,9 @@
 		 	var projection = d3.geo.transverseMercator().center([3, -38]).rotate([66, 0])
 		 	.translate([(mapw / 2), (maph / 2)]).scale((maph * 56.5) / 35);
 		 	var mappath = d3.geo.path().projection(projection);
-
+		 	var aviso=maplayer1.append('text').text('Cargando mapa...').attr('x',(mapw/2)-80).attr('y',maph/2);
 			d3.json("maps/provincias.json", function(json) {//Provincias excepto T. del Fuego
+
 				maplayer1.selectAll("path")
 					.data(json.features)
 					.enter()
@@ -267,6 +321,7 @@
 					.attr("class","provincia")
 					.on("mouseover", onMouseOver)
 					.on("mouseout", onMouseOut);
+					aviso.text('');
 			});
 
 			d3.json("maps/TIERRA DEL FUEGO.json", function(json) {//Aqui incorporamos T. del Fuego

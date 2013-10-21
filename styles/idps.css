@@ -97,6 +97,11 @@ table{
 	font-weight: bold;
 }
 
+.flechas text{
+	font-family: "Helvetica Neue",Arial,sans-serif;
+	font-size: 12px;
+}
+
 .yaxis text,
 .xaxis text{
 	font-family:sans-serif;
