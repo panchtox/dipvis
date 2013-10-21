@@ -137,11 +137,9 @@
 				.style("font-size", "16px")
 				.text("Postura de los diputados al votar los proyectos de ley durante el periodo 2006 - 2011");
 			/*
-			* Dibuja flechas
+			* Dibuja flechas del eje y
 			*/
 				var capaFlechas=svg.append("g").attr("class","flechas");
-
-				// var defs = capaFlechas.append("defs");
 
 				capaFlechas.append("marker")
 					.attr("id", "triangle-start")
@@ -300,8 +298,9 @@
 		 	var projection = d3.geo.transverseMercator().center([3, -38]).rotate([66, 0])
 		 	.translate([(mapw / 2), (maph / 2)]).scale((maph * 56.5) / 35);
 		 	var mappath = d3.geo.path().projection(projection);
-
+		 	var aviso=maplayer1.append('text').text('Cargando mapa...').attr('x',(mapw/2)-80).attr('y',maph/2);
 			d3.json("maps/provincias.json", function(json) {//Provincias excepto T. del Fuego
+
 				maplayer1.selectAll("path")
 					.data(json.features)
 					.enter()
@@ -309,6 +308,7 @@
 					.attr("d", mappath)
 					.attr("id",function(d){return "p"+(d.properties.prov);})
 					.style("fill","#405ac2");
+				aviso.text('');
 			});
 
 			d3.json("maps/TIERRA DEL FUEGO.json", function(json) {//Aqui incorporamos T. del Fuego
