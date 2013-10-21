@@ -27,17 +27,21 @@
 
 		function actualizarFideos() {//Destaca la linea de los diputados seleccionados en el combobox
 			var Dips = recuperar_seleccion('diputados');
-			d3.selectAll('.posturadip').attr("stroke","#d9d8d8").attr("pointer-events","none");
+			d3.selectAll('.posturadip').classed('disabled', true);
+			
 			if (Dips.length) {
-			for (var i = 0; i < Dips.length; i++) {
-				dip=d3.select("#"+Dips[i]).attr("stroke",color10(Dips[i])).attr("pointer-events","auto").moveToFront();
-			};
+				for (var i = 0; i < Dips.length; i++) {
+					console.log(d3.select("#" + Dips[i]));
+					d3.select("#" + Dips[i]).classed('disabled', false);
+					d3.select("#" + Dips[i]).classed('enabled', true);
+					d3.select("#" + Dips[i]).moveToFront();
+
+				};
 			} else{
 				dips.forEach(
 					function(d){
-						d3.select("#dip"+d.id)
-						.attr("stroke", d.col)
-						.attr("pointer-events","auto");
+						d3.select("#dip"+d.id).classed('disabled', false);
+						d3.select("#dip"+d.id).classed('enabled', false);
 					}
 				);
 			};
@@ -300,19 +304,12 @@
 			}
 
 			function selectCurrent(selection){
-				selection.each(function(d,i) { 
-					var currClass = d3.select(this).attr("class");
-					d3.select(this).attr("class", currClass + " current");
-				});
+				selection.classed('current', true);
 				selection.moveToFront();
 			}
 
 			function unselectCurrent(selection){
-				selection.each(function(d,i) { 
-					var currClass = d3.select(this).attr("class");
-					var prevClass = currClass.substring(0, currClass.length-8);
-					d3.select(this).attr("class", prevClass);
-				});
+				selection.classed('current', false);
 			}			
 		</script>
 	</body>

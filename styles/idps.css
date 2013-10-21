@@ -56,6 +56,22 @@ table{
     stroke-width: 2;
 }
 
+.posturadip.oficialista.disabled,
+.posturadip.opositora.disabled,
+.posturadip.variable.disabled
+ {
+    stroke: #d9d8d8;
+    pointer-events: none;
+}
+
+.posturadip.oficialista.enabled,
+.posturadip.opositora.enabled,
+.posturadip.variable.enabled
+ {
+    stroke: blue;
+    pointer-events: auto;
+}
+
 #mapa {
 	/*float: right;*/
 	box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
