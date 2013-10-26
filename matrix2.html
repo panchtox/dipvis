@@ -56,7 +56,7 @@
 	var data, matrix, ord;
 	var nodes=[], bloques=[], regiones=[];
 
-	traerDatos('2010','BUENOS AIRES');
+	traerDatos('2010','82');
 
 	function traerDatos(selYear,selProv){
 		d3.json("data/matrix.json", function(json) {
@@ -79,7 +79,7 @@
 			// provincias=[];
 			data.forEach(
 					function(d){
-						if (d.year==ye && d.region==reg) {
+						if (d.year==ye && d.distrito==reg) {
 							nodes.push(d);
 						};
 					}
@@ -234,7 +234,7 @@ function reversarIDmatrix(id){
 	}
 	for (var i = 0; i < perfil.near.length; i++) {
 		// console.log("n:"+nodes[perfil.near[i]].nombre);
-		d3.select('#n'+(i)+" img").attr("src","images/diputados/"+nodes[perfil.near[i]].foto);
+		d3.select('#n'+(i)+" img").attr("src","images/"+nodes[perfil.near[i]].foto);
 		d3.select("#n"+i+" a").attr("href","http://www.google.com/search?q="+(nodes[perfil.near[i]].nombre).replace(" ","+"))
 		.attr("target","_blank").text(nodes[perfil.near[i]].nombre);
 		if (i%2==0 && i!=0) {
