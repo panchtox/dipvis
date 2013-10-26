@@ -1,19 +1,17 @@
-			@import url(http://fonts.googleapis.com/css?family=PT+Serif|PT+Serif:b|PT+Serif:i|PT+Sans|PT+Sans:b);
+@import url(http://fonts.googleapis.com/css?family=PT+Serif|PT+Serif:b|PT+Serif:i|PT+Sans|PT+Sans:b);
 
-html {
+/*html {
   min-width: 1040px;
-}
+}*/
 
 body {
   background: #fcfcfa;
   color: #333;
-  font-family: "PT Serif", serif;
-  /*margin: -2em auto 4em auto;*/
+  font-family: "PT Serif", sans-serif;
   position: relative;
-  /*width: 1200px;*/
 }
 
-header,
+/*header,
 footer,
 h1,
 h2,
@@ -22,8 +20,8 @@ h4,
 aside {
   color: #000;
   font-family: "PT Sans", sans-serif;
-}
-
+}*/
+/*
 h1 {
   font-size: 64px;
   font-weight: 300;
@@ -37,8 +35,8 @@ h2 {
 
 h1, h2 {
   text-rendering: optimizeLegibility;
-}
-
+}*/
+/*
 h2 a {
   color: #ccc;
   left: -20px;
@@ -63,12 +61,11 @@ footer aside {
 
 aside {
   font-size: small;
-  /*right: 0;*/
   position: absolute;
   right: 200px;
   width: 230px;
 }
-
+*/
 #zona{
   position: absolute;
   right: 150px;
@@ -211,19 +208,6 @@ img{
     font-family: "Menlo",monospace;
     font-size: small;
     font: 7px sans-serif;
-}
-
-#ref {
-    /*position: absolute;*/
-    /*left: 560px;*/
-    /*top: 180px;*/
-    text-align: center;
-    width: 100px;
-    float: right;
-    margin-top: 100px;
-    right: 20px;
-    text-align: center;
-    width: 100px;
 }
 
 .bloqueref {
