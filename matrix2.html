@@ -58,7 +58,7 @@
 	var data, matrix, ord;
 	var nodes=[], bloques=[], regiones=[];
 
-	traerDatos('2010','82');
+	traerDatos('2010',prov);
 
 	function traerDatos(selYear,selProv){
 		d3.json("data/matrix.json", function(json) {
