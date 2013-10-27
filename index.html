@@ -320,7 +320,8 @@
 					.attr("id",function(d){return "p"+(d.properties.prov);})
 					.attr("class","provincia")
 					.on("mouseover", onMouseOver)
-					.on("mouseout", onMouseOut);
+					.on("mouseout", onMouseOut)
+					.on("click", onClick);
 					aviso.text('');
 			});
 
@@ -333,8 +334,15 @@
 					.attr("id",function(d){return "p"+(d.properties.prov);})
 					.attr("class","provincia")
 					.on("mouseover", onMouseOver)
-					.on("mouseout", onMouseOut);
+					.on("mouseout", onMouseOut)
+					.on("click", onClick);
 			});
+
+			function onClick() {
+				var prov = d3.select(this).attr("id");
+				console.log("onclick!!!", prov);
+				window.location = '/matrix2.html#' + prov.substring(1);
+			}
 
 			function onMouseOver() {
 				//Pintar provincia de rojo

@@ -53,6 +53,8 @@
 			</tr>
 		</table>
 	<script type="text/javascript">
+	var prov = document.URL.split('#')[1];
+	console.log(prov);
 	var vwWidth=document.documentElement.clientWidth;
 	var margin = {top: 150, right: 0, bottom: 10, left: 150}, wmx = vwWidth*0.40, hmx = wmx;
 	var x = d3.scale.ordinal().rangeBands([0, wmx]), z = d3.scale.linear().domain([4, 0]).clamp(true), c = d3.scale.category10().domain(d3.range(10));
