@@ -28,9 +28,6 @@
 		<table>
 			<tr>
 				<td id="controls">
-						<p>Regi&oacute;n:
-						<select id="region">
-						</select>
 						<p>Orden:
 						<select id="order">
 							<option value="nombre">por Nombre</option>
@@ -61,18 +58,17 @@
 	var data, matrix, ord;
 	var nodes=[], bloques=[], regiones=[];
 
-	traerDatos('2010','CABA');
+	traerDatos('2010','82');
 
 	function traerDatos(selYear,selProv){
 		d3.json("data/matrix.json", function(json) {
 			data=json.datosMatrix;
-			data.forEach(function(p){if(regiones.indexOf(p.region)>-1 || p.region==""){}else{regiones.push(p.region)}});
 			drawMatrix(selYear,selProv);
 		});
 	}
 
 			function drawMatrix(ye,reg){
-
+				d3.select("#order").property("selectedIndex", 0);
 			var svg2 = d3.select("#heatmap").append("svg")
 				.attr("width", wmx + margin.left + margin.right)
 				.attr("height", hmx + margin.top + margin.bottom)
@@ -85,7 +81,7 @@
 			// provincias=[];
 			data.forEach(
 					function(d){
-						if (d.year==ye && d.region==reg) {
+						if (d.year==ye && d.distrito==reg) {
 							nodes.push(d);
 						};
 					}
@@ -123,7 +119,7 @@
 				// console.log()
 				x.domain("orders."+ord);
 			} else{
-				x.domain(orders.idp);
+				x.domain(orders.nombre);
 			};
 			// x.domain(orders.idp);
 
@@ -229,32 +225,6 @@
 				}
 			}
 
-			var C = $("#year option");
-C.on('mouseenter', function(){
-    var V = $(this).val();
-    // console.log(V);
-    d3.select("#svgmatrix") .remove();
-				nodes=[];
-				ye=V;
-				drawMatrix(ye,reg);
-
-			var o = document.getElementById("order");
-			var ord = o.options[o.selectedIndex].value;
-});
-
-			var D = $("#region option");
-D.on('mouseenter', function(){
-    var W = $(this).val();
-    // console.log(V);
-    d3.select("#svgmatrix") .remove();
-				nodes=[];
-				reg=W;
-				drawMatrix(ye,reg);
-
-			var o = document.getElementById("order");
-			var ord = o.options[o.selectedIndex].value;
-});
-
 function reversarIDmatrix(id){
 	var aidi=id.replace("matrix","");
 	// console.log(aidi);
@@ -266,7 +236,7 @@ function reversarIDmatrix(id){
 	}
 	for (var i = 0; i < perfil.near.length; i++) {
 		// console.log("n:"+nodes[perfil.near[i]].nombre);
-		d3.select('#n'+(i)+" img").attr("src","images/diputados/"+nodes[perfil.near[i]].foto);
+		d3.select('#n'+(i)+" img").attr("src","images/"+nodes[perfil.near[i]].foto);
 		d3.select("#n"+i+" a").attr("href","http://www.google.com/search?q="+(nodes[perfil.near[i]].nombre).replace(" ","+"))
 		.attr("target","_blank").text(nodes[perfil.near[i]].nombre);
 		if (i%2==0 && i!=0) {
