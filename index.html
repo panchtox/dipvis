@@ -324,9 +324,11 @@
 					.append("path")
 					.attr("d", mappath)
 					.attr("id",function(d){return "p"+(d.properties.prov);})
+					.attr("provname",function(d){return (d.properties.provincia);})
 					.attr("class","provincia")
 					.on("mouseover", onMouseOver)
-					.on("mouseout", onMouseOut);
+					.on("mouseout", onMouseOut)
+					.on("click", onClick);
 					aviso.text('');
 			});
 
@@ -337,10 +339,19 @@
 					.append("path")
 					.attr("d", mappath)
 					.attr("id",function(d){return "p"+(d.properties.prov);})
+					.attr("provname",function(d){return (d.properties.PROVINCIA);})
 					.attr("class","provincia")
 					.on("mouseover", onMouseOver)
-					.on("mouseout", onMouseOut);
+					.on("mouseout", onMouseOut)
+					.on("click", onClick);
 			});
+
+			function onClick() {
+				var prov = d3.select(this).attr("id");
+				var provname = d3.select(this).attr("provname");
+				console.log("onclick!!!", prov);
+				window.location = '/matrix2.html#' + prov.substring(1) + "#" + provname;
+			}
 
 			function onMouseOver() {
 				//Pintar provincia de rojo
