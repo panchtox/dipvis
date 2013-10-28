@@ -28,11 +28,21 @@
 		<table>
 			<tr>
 				<td id="controls">
+						<p id="nombreProvincia"></p>
 						<p>Orden:
 						<select id="order">
 							<option value="nombre">por Nombre</option>
 							<option value="idp">por punto ideal</option>
 							<option value="bloque">por Bloque</option>
+						</select>
+						<p>Periodo:
+						<select id="year">
+							<option value="2006">2006</option>
+							<option value="2007">2007</option>
+							<option value="2008">2008</option>
+							<option value="2009">2009</option>
+							<option value="2010">2010</option>
+							<option value="2011">2011</option>
 						</select>
 				</td>
 				<td id="heatmap"></td>
@@ -51,6 +61,8 @@
 		</table>
 	<script type="text/javascript">
 	var prov = document.URL.split('#')[1];
+	var provName = document.URL.split('#')[2];
+	provName = provName.replace(/%20/g,' ');	
 	console.log(prov);
 	var vwWidth=document.documentElement.clientWidth;
 	var margin = {top: 150, right: 0, bottom: 10, left: 150}, wmx = vwWidth*0.40, hmx = wmx;
@@ -58,7 +70,7 @@
 	var data, matrix, ord;
 	var nodes=[], bloques=[], regiones=[];
 
-	traerDatos('2010',prov);
+	traerDatos('2006',prov);
 
 	function traerDatos(selYear,selProv){
 		d3.json("data/matrix.json", function(json) {
@@ -180,6 +192,8 @@
 					.append("p")
 					.text(bloques[b]);
 			}
+
+			document.getElementById('nombreProvincia').innerHTML=provName;
 /********************************Funciones************************************/
 			function row(row) {
 				var cell = d3.select(this).selectAll(".cell")
@@ -252,4 +266,28 @@ function reversarIDmatrix(id){
 		d3.select('#near').selectAll("td").attr("align","center");
 	};
 }
+
+var C = $("#year option");
+C.on('mouseenter', function(){
+    var V = $(this).val();
+    // console.log(V);
+    d3.select("#svgmatrix") .remove();
+				nodes=[];
+				ye=V;
+				drawMatrix(ye,prov);
+
+			var o = document.getElementById("order");
+			var ord = o.options[o.selectedIndex].value;
+});
 		</script>
+	</body>
+	<script>
+	  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+	  ga('create', 'UA-44984023-1', 'dipvis.org');
+	  ga('send', 'pageview');
+	</script>
+</html>

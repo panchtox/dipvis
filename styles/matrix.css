@@ -11,6 +11,15 @@ body {
   position: relative;
 }
 
+td{
+  font-family: "Helvetica Neue",Arial,sans-serif;
+  font-size: 14px;
+}
+
+#nombreProvincia{
+  font-weight: bold;
+  font-size: 16px;
+}
 /*header,
 footer,
 h1,
