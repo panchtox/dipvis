@@ -1,0 +1,163 @@
+<html>
+<head></head>
+<body>
+<link rel="stylesheet" type="text/css" href="styles/general.css">
+<link rel="stylesheet" type="text/css" href="styles/menu.css">
+<link rel="stylesheet" type="text/css" href="styles/tutorial.css">
+<ul class="menu">
+	<li><a href="index.html">Home</a></li>
+	<li><a>Posturas de voto</a>
+		<ul>
+			<li><a href="datosOriginales.html">Definici&oacute;n y datos originales</a></li>
+			<li><a href="disclaimer.html">Aclaraciones</a></li>
+		</ul>
+	</li>
+	<li><a>Cr&eacute;ditos</a>
+		<ul>
+			<li><a href="equipo.html">Equipo de trabajo</a></li>
+			<li><a href="agradecimientos.html">Agradecimientos</a></li>
+		</ul>
+	</li>
+	<li><a>Tutorial</a>
+		<ul>
+			<li><a href="tutorialMatrix.html">Mapa de calor</a></li>
+		</ul>
+	</li>
+	<li><a href="requerimientos.html">Requerimientos</a>
+	</li>
+</ul>
+<table>
+	<tr>
+		<td colspan=3>
+			<h2>Hac&eacute; click sobre una provincia para seleccionar los diputados de la misma</h2>
+		</td>
+	</tr>
+	<tr>
+		<td>
+			<img src="images/matClickMap_50x101.png">
+		</td>
+		<td>
+			<p>Cuando hagas click sobre la provincia ir&aacute;s a un mapa de calor mostrando los diputados de esa provincia en una matriz ordenada por nombre. <br/>El color de cada celda indica cuando 2 diputados coinciden en un bloque. <br/>La intensidad indica la semejanza al votar ese a&ntilde;o los proyectos de ley.</p><p>Una peque&ntilde;a rese&ntilde;a a la derecha de la matriz te muestra a que bloque pertenece cada color</p>
+		</td>
+		<td>
+			<img src="images/matOrderedName_200x173.png">
+		</td>
+	</tr>
+	<tr>
+		<td colspan=3>
+			<h2>Pas&aacute; el mouse sobre una celda</h2>
+		</td>
+	</tr>
+	<tr>
+		<td>
+			<img src="images/matCellHover_100x102.png">
+		</td>
+		<td>
+			<p>Al pasar el mouse sobre una celda cambiar&aacute; el color de los 2 legisladores que hacen intersecci&oacute;n en esa celda de la matriz, facilitando la identificaci&oacute;n de quienes est&aacute;n generando el aspecto de la misma.</p><br/>
+		</td>
+		<td>
+		</td>
+	</tr>
+	<tr>
+		<td colspan=3>
+			<h2>Descubr&iacute; cuales diputados fueron m&aacute;s afines a otro</h2>
+		</td>
+	</tr>
+	<tr>
+		<td>
+			<img src="images/matAffinitySelect_100x72.png">
+		</td>
+		<td>
+			<p>Pasando el mouse sobre los nombres de los diputados que est&aacute;n a la izquierda de la matriz, ver&aacute;s sobre la derecha la imagen del legislador seleccionado, con los 6 diputados que votaron con mayor semejanza a &eacute;l, durante ese periodo.</p>
+		</td>
+		<td>
+			<img src="images/matAffinityTable_100x94.png">
+		</td>
+	</tr>
+	<tr>
+		<td colspan=3>
+			<h2>Eleg&iacute; un periodo determinado</h2>
+		</td>
+	</tr>
+	<tr>
+		<td>
+			<img src="images/matSelPeriod_100x105.png">
+		</td>
+		<td>
+			<p>En el campo combinado "Periodo" pod&eacute;s cambiar el a&ntilde;o que est&aacute;s visualizado en la matriz. Pod&eacute;s pasar con el mouse sobre los periodos desplegados para cambiar antes de seleccionar haciendo click sobre un determinado periodo.</p>
+		</td>
+		<td>
+		</td>
+	</tr>
+	<tr>
+		<td colspan=3>
+			<h2>Reorden&aacute; la matriz para detectar patrones</h2>
+		</td>
+	</tr>
+	<tr>
+		<td colspan=3>
+			<h3>Por bloque</h3>
+		</td>
+	</tr>
+	<tr>
+		<td>
+			<img src="images/matSelOrderBloque_100x64.png">
+		</td>
+		<td>
+			<p>Si eleg&iacute;s ordenar la matriz x bloque, ver&aacute;s como se agrupan por bloque los diputados. Como la intensidad de cada celda indica el nivel de semejanza de 2 diputados durante ese periodo, podr&aacute;s identificar f&aacute;cilmente las diferencias que tuvieron respecto de su bloque. As&iacute;, los diputados que votaron durante todo ese per&iacute;odo con una postura diferente de la de su bloque, tendr&aacute;n el mismo color de bloque pero con una franja de tonalidad m&aacute;s clara.</p>
+		</td>
+		<td>
+			<img src="images/matBloqueIntraHeterogeneity_100x120.png">
+		</td>
+	</tr>
+	<tr>
+		<td>
+			
+		</td>
+		<td>
+			<p>Tambi&eacute;n pod&eacute;s notar que en las zonas fuera de los bloques hay diferentes tonalidades. Esto es porque los diputados pueden parecerse o no a&uacute;n cuando pertenezcan a diferentes bloques.</p>
+		</td>
+		<td>
+			<img src="images/matBloqueInterHeterogeneity_100x120.png">
+		</td>
+	</tr>
+	<tr>
+		<td colspan=3>
+			<h3>Por punto ideal</h3>
+		</td>
+	</tr>
+	<tr>
+		<td>
+			<img src="images/matSelOrderIDP_100x62.png">
+		</td>
+		<td>
+			<p>Ordenando por punto ideal (nuestra medida de postura al votar los proyectos), ver&aacute;s como se reagrupan los diputados. El &aacute;ngulo superior izquierdo representa la postura m&aacute;s opositora y a la inversa, el inferior derecho la postura m&aacute;s oficialista</p>
+		</td>
+		<td>
+			<img src="images/matOrderedIDP_100x100.png">
+		</td>
+	</tr>
+	<tr>
+		<td>
+			
+		</td>
+		<td>
+			<p>Si mir&aacute;s bien te vas a dar cuenta que se forman como 2 rombos opuestos por un v&eacute;rtice. &Eacute;stos delimitan las "zonas" opositora (arriba y a la izquierda) y oficialista (abajo a la derecha).</p>
+		</td>
+		<td>
+			<img src="images/matOrderedIDPrombosOpuestos_100x100.png">
+		</td>
+	</tr>
+</table>
+</body>
+<script>
+	  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+	  ga('create', 'UA-44984023-1', 'dipvis.org');
+	  ga('send', 'pageview');
+
+	</script>
+</html>

@@ -1,0 +1,19 @@
+img{
+	float: left;
+	margin-right: 40px;
+	margin-left: 20px;
+	margin-bottom: 20px;
+}
+
+h2{
+	clear: left;
+}
+
+p{
+	/*width: 70%;*/
+}
+
+table{
+	width: 80%;
+	margin-left: 60px;
+}

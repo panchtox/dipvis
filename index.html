@@ -249,6 +249,11 @@
 					<li><a href="agradecimientos.html">Agradecimientos</a></li>
 				</ul>
 			</li>
+			<li><a>Tutorial</a>
+				<ul>
+					<li><a href="tutorialMatrix.html">Mapa de calor</a></li>
+				</ul>
+			</li>
 			<li><a href="requerimientos.html">Requerimientos</a>
 			</li>
 			<li style="padding-top: 10px">
@@ -349,7 +354,7 @@
 			function onClick() {
 				var prov = d3.select(this).attr("id");
 				var provname = d3.select(this).attr("provname");
-				console.log("onclick!!!", prov);
+				// console.log("onclick!!!", prov);
 				window.location = '/matrix2.html#' + prov.substring(1) + "#" + provname;
 			}
 
