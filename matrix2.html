@@ -256,7 +256,7 @@ function reversarIDmatrix(id){
 	for (var i = 0; i < perfil.near.length; i++) {
 		// console.log("n:"+nodes[perfil.near[i]].nombre);
 		d3.select('#n'+(i)+" img").attr("src","images/"+nodes[perfil.near[i]].foto);
-		d3.select("#n"+i+" a").attr("href","http://www.google.com/search?q="+(nodes[perfil.near[i]].nombre).replace(" ","+"))
+		d3.select("#n"+i+" a").attr("href","http://www.google.com.ar/search?q="+(nodes[perfil.near[i]].nombre).replace(" ","+"))
 		.attr("target","_blank").text(nodes[perfil.near[i]].nombre);
 		if (i%2==0 && i!=0) {
 			d3.select('#n'+(i)).style("border-left","2px solid "+c(nodes[perfil.near[i]].bloque));
