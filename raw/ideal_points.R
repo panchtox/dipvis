@@ -1,29 +1,31 @@
 library(pscl)
 library(RColorBrewer)
 
-years <- 2007:2013
+years <- 2003:2013
 meses <- 1:12
-sesiones <- read.csv("C:/Users/Alejandro/Desktop/votacion/output_ale.txt", encoding="latin-1")
+#sesiones <- read.csv("C:/Users/Alejandro/Desktop/votacion/output_ale.txt", encoding="latin-1")
+sesiones <- read.csv("C:/Users/Alejandro/Desktop/votaciones and asuntos.csv", encoding="latin-1")
+diputados <- read.csv("C:/Users/Alejandro/Desktop/diputados.csv", encoding="latin-1")
 
 for (year in years) {
     #votos <- read.csv(paste('../output', year, '.csv', sep=""))
-      votos <- sesiones[sesiones$anio == year,]
+      votos <- sesiones[sesiones$ano == year,]
       if ( dim(votos)[1] != 0 ) {
           nvotos <- dim(votos)[1]
-          legis.names <- as.vector(unique(votos[,'legislador']))
+          legis.names <- as.vector(unique(diputados[votos[,'diputadoId'],"nombre"]))
           nlegis <- length(legis.names)
-          legis.partidos <- as.vector(votos[rownames(unique(votos['legislador'])),
-                                            'bloque'])
+          legis.partidos <- as.vector(votos[rownames(unique(votos['diputadoId'])),
+                                            'bloqueId'])
           
-          actas.names <- as.vector(unique(votos[,'acta']))
+          actas.names <- as.vector(unique(votos[,'titulo']))
           nactas <- length(actas.names)
           
           niveles <- unique(votos[,'voto'])
-          
-          notInLegis <- match('AUSENTE', niveles)
-          yea <- match('AFIRMATIVO', niveles)
-          nay <- match('NEGATIVO', niveles)
-          abstencion <- match('ABSTENCION', niveles)
+          # 0 = Afirmativo, 1 = Negativo, 2 = Abstención, 3 = Ausente
+          notInLegis <- match(3, niveles)
+          yea <- match(0, niveles)
+          nay <- match(1, niveles)
+          abstencion <- match(2, niveles)
           
           data <- matrix(, nlegis, nactas)
           
@@ -32,8 +34,8 @@ for (year in years) {
                           year, '.asp', sep='')
           
           for (n in 1:nvotos) {
-            nombre <- legis.names == votos[n, 'legislador']
-            acta <- actas.names == votos[n, 'acta']
+            nombre <- legis.names == diputados[votos[n,'diputadoId'],"nombre"]
+            acta <- actas.names == votos[n, 'titulo']
             nivel <- match(votos[n, 'voto'], niveles)
             data[nombre, acta] <- nivel
           }
@@ -49,9 +51,9 @@ for (year in years) {
           fitted <- ideal(rData, normalize=FALSE)
           
           outcome <- fitted$xbar
-          if (year==2008) {
-            outcome <- -outcome
-          }
+#           if (year==2008) {
+#             outcome <- -outcome
+#           }
           
           write.table(outcome, file=paste('ideal_points_', year, '_sin_normalizar.csv', sep=''),
                       col.names=FALSE, sep=',')
