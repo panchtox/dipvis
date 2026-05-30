@@ -1,11 +1,12 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 	<head>
-		<meta http-equiv="Content-Type" content="text/html; charset=ISO8859-1" />
+		<script>(function(){try{var p=new URLSearchParams(location.search).get('theme');var t=p||localStorage.getItem('dipvis-theme')||'editorial';if(['editorial','minimal','ink'].indexOf(t)<0)t='editorial';document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+		<meta charset="UTF-8" />
 		<link rel="stylesheet" type="text/css" href="styles/menu.css">
 		<link rel="stylesheet" href="styles/idps.css">
 		<link rel="stylesheet" href="styles/chosen.css">
-		<script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+		<script src="https://d3js.org/d3.v3.min.js" charset="utf-8"></script>
 		<script type="text/JavaScript" src="//ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
 		<script src="lib/jquery.sparkline.min.js"></script>
 		<script src="lib/chosen.jquery.js" type="text/javascript"></script>
@@ -191,11 +192,11 @@
 					.attr("marker-start", "url(#triangle-start)")
 					.style("stroke","black");
 				capaFlechas.append('text')
-					.text('oposicion')
+					.text('Oposición')
 					.attr('y',idpsYscale(2.3))
 					.attr('x',20);
 				capaFlechas.append('text')
-					.text('oficialismo')
+					.text('Oficialismo')
 					.attr('y',idpsYscale(-2.3))
 					.attr('x',20);
 			/**/
@@ -235,6 +236,13 @@
 		
 	</head>
 	<body>
+		<!-- DipVis theme layer -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=Archivo:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles/theme.css">
+<script src="theme-init.js"></script>
+<script src="olas.js"></script>
 		<ul class="menu">
 			<li><a href="index.html">Home</a></li>
 			<li><a>Posturas de voto</a>
@@ -286,7 +294,7 @@
 		</table>
 		<div id="tooltip" class="hidden">
 			<span id="tristate">Loading..</span>
-			<img src=""></img><br>
+			<img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"></img><br>
 			<strong>Diputado</strong><br>
 			<bloque>bloque</bloque>
 		</div>
@@ -382,7 +390,10 @@
 
 			function selectCurrent(selection){
 				selection.classed('current', true);
-				selection.moveToFront();
+				// NO usar moveToFront() aqui: reordenar el nodo bajo el cursor durante el
+				// mouseover dispara una cascada de mouseover/mouseout sobre los paths que se
+				// solapan, dejando la clase 'current' (rojo) pegada y tragando el click en
+				// las provincias. El resaltado en rojo via CSS ya distingue el elemento.
 			}
 
 			function unselectCurrent(selection){

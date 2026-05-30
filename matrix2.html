@@ -1,13 +1,20 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 	<head>
-		<meta http-equiv="Content-Type" content="text/html; charset=ISO8859-1" />
+		<script>(function(){try{var p=new URLSearchParams(location.search).get('theme');var t=p||localStorage.getItem('dipvis-theme')||'editorial';if(['editorial','minimal','ink'].indexOf(t)<0)t='editorial';document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+		<meta charset="UTF-8" />
 		<link rel="stylesheet" type="text/css" href="styles/menu.css">
 		<link rel="stylesheet" href="styles/matrix.css">
-		<script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+		<script src="https://d3js.org/d3.v3.min.js" charset="utf-8"></script>
 		<script type="text/JavaScript" src="//ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
 	</head>
 	<body>
+		<!-- DipVis theme layer -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=Archivo:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles/theme.css">
+<script src="theme-init.js"></script>
 		<ul class="menu">
 			<li><a href="index.html">Home</a></li>
 			<li><a>Posturas de voto</a>
@@ -55,10 +62,10 @@
 				<td>
 					<div id="near">
 						<table>
-							<tr><td id="n0" colspan="2" ><img src=""><br /><a href="" class="nombre"></a></td></tr>
-							<tr><td id="n1"><img src=""><br /><a href="" class="nombre"></a></td><td id="n2"><img src=""><br /><a href="" class="nombre"></a></td></tr>
-							<tr><td id="n3"><img src=""><br /><a href="" class="nombre"></a></td><td id="n4"><img src=""><br /><a href="" class="nombre"></a></td></tr>
-							<tr><td id="n5"><img src=""><br /><a href="" class="nombre"></a></td><td id="n6"><img src=""><br /><a href="" class="nombre"></a></td></tr>
+							<tr><td id="n0" colspan="2" ><img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"><br /><a href="" class="nombre"></a></td></tr>
+							<tr><td id="n1"><img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"><br /><a href="" class="nombre"></a></td><td id="n2"><img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"><br /><a href="" class="nombre"></a></td></tr>
+							<tr><td id="n3"><img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"><br /><a href="" class="nombre"></a></td><td id="n4"><img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"><br /><a href="" class="nombre"></a></td></tr>
+							<tr><td id="n5"><img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"><br /><a href="" class="nombre"></a></td><td id="n6"><img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"><br /><a href="" class="nombre"></a></td></tr>
 						</table>
 					</div>
 				</td>
@@ -67,11 +74,13 @@
 	<script type="text/javascript">
 	var prov = document.URL.split('#')[1];
 	var provName = document.URL.split('#')[2];
+	if(!prov){ prov = '6'; }                 // por defecto: provincia más grande
+	if(!provName){ provName = 'Buenos Aires'; }
 	provName = provName.replace(/%20/g,' ');	
 	console.log(prov);
 	var vwWidth=document.documentElement.clientWidth;
 	var margin = {top: 150, right: 0, bottom: 10, left: 150}, wmx = vwWidth*0.40, hmx = wmx;
-	var x = d3.scale.ordinal().rangeBands([0, wmx]), z = d3.scale.linear().domain([4, 0]).clamp(true), c = d3.scale.category10().domain(d3.range(10));
+	var x = d3.scale.ordinal().rangeBands([0, wmx]), z = d3.scale.linear().domain([4, 0]).clamp(true), c = d3.scale.ordinal().range(["#2f5d86","#bd7a36","#5d7d39","#8a4f9e","#3f9d92","#c2553f","#7d6a4f","#4a7bb5","#9c8a3d","#b0608a"]);
 	var data, matrix, ord;
 	var nodes=[], bloques=[], regiones=[];
 
@@ -85,7 +94,6 @@
 	}
 
 			function drawMatrix(ye,reg){
-				d3.select("#order").property("selectedIndex", 0);
 			var svg2 = d3.select("#heatmap").append("svg")
 				.attr("width", wmx + margin.left + margin.right)
 				.attr("height", hmx + margin.top + margin.bottom)
@@ -131,14 +139,10 @@
 				// ,prov: d3.range(n).sort(function(a, b) { return d3.ascending(nodes[b].distrito , nodes[a].distrito); })
 			};
 
-			// The default sort order.
-			if (ord) {
-				// console.log()
-				x.domain("orders."+ord);
-			} else{
-				x.domain(orders.nombre);
-			};
-			// x.domain(orders.idp);
+			// Respetar el orden elegido por el usuario: se mantiene al cambiar de año.
+			var selOrder = document.getElementById("order").value;
+			if (!orders[selOrder]) selOrder = "nombre";
+			x.domain(orders[selOrder]);
 
 			svg2.append("rect")
 				.attr("class", "background")
@@ -184,15 +188,13 @@
 				.attr("text-anchor", "start")
 				.text(function(d, i) { return nodes[i].nombre; });
 
-			$('.bloqueref').remove();
-			$('.bloquetext').remove();
+			$('.bloque-row').remove();
 			for(b in bloques){
-				d3.select("#refBloque")
-					.append("div")
+				var rowb = d3.select("#refBloque").append("div").attr("class","bloque-row");
+				rowb.append("div")
 					.attr("class","bloqueref")
 					.style("background-color",c(bloques[b]));
-				d3.select("#refBloque")
-					.append("div")
+				rowb.append("div")
 					.attr("class","bloquetext")
 					.append("p")
 					.text(bloques[b]);
@@ -272,17 +274,14 @@ function reversarIDmatrix(id){
 	};
 }
 
-var C = $("#year option");
-C.on('mouseenter', function(){
+// Cambiar año cuando se seleccione una opción diferente
+$("#year").on('change', function(){
     var V = $(this).val();
-    // console.log(V);
-    d3.select("#svgmatrix") .remove();
-				nodes=[];
-				ye=V;
-				drawMatrix(ye,prov);
-
-			var o = document.getElementById("order");
-			var ord = o.options[o.selectedIndex].value;
+    console.log("Año seleccionado: " + V);
+    d3.select("#svgmatrix").remove();
+    nodes = [];
+    ye = V;
+    drawMatrix(ye, prov);   // drawMatrix lee el orden actual del <select> y lo conserva
 });
 		</script>
 	</body>
