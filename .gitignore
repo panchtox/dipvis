@@ -1,1 +1,8 @@
 *.DS_Store
+.Rproj.user
+desktop.ini
+raw/
+rest-api/
+lib/sort.php
+dipvis/
+dipvis 2/
