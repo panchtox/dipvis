@@ -6,6 +6,10 @@
    ============================================================ */
 (function () {
   var THRESHOLD = 0.1; // mínimo de magnitud para contar un cruce (anti-ruido)
+  // Configuración por página (opcional). Sin window.DIPVIS, todo queda como en 2006-2011.
+  var CFG = window.DIPVIS || {};
+  var ANIOS = CFG.anios || [2006, 2011];
+  var FLECHA = CFG.flechas || { 'ofi-opo': 'ofi&rarr;opo', 'opo-ofi': 'opo&rarr;ofi' };
 
   // ---- detección pura ----
   // dir: "ofi-opo" llega a idp>0 ; "opo-ofi" llega a idp<0
@@ -64,7 +68,7 @@
     var idps = [];
     window.dips.forEach(function (d) { d.points.forEach(function (p) { idps.push(p.idp); }); });
     return {
-      x: d3.time.scale().domain([2006, 2011]).range([margin1, w - margin1]),
+      x: d3.time.scale().domain(ANIOS).range([margin1, w - margin1]),
       y: d3.scale.linear().domain([d3.min(idps), d3.max(idps)]).range([h - margin1, margin1])
     };
   }
@@ -93,7 +97,7 @@
       row.type = 'button';
       row.className = 'olas-row dir-' + wv.dir;
       row.setAttribute('data-key', wv.key);
-      var arrow = wv.dir === 'ofi-opo' ? 'ofi&rarr;opo' : 'opo&rarr;ofi';
+      var arrow = FLECHA[wv.dir];
       row.innerHTML =
         '<span class="olas-sw"></span>' +
         '<span class="olas-yr">' + wv.year + '</span> ' +

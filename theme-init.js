@@ -8,6 +8,14 @@
   var THEMES = ["editorial", "minimal", "ink"];
   var LABELS = { editorial: "Editorial", minimal: "Minimal", ink: "Ink" };
   var KEY = "dipvis-theme";
+  // Configuración por página (opcional). Sin window.DIPVIS, todo queda como en 2006-2011.
+  var CFG = window.DIPVIS || {};
+  var BASE = CFG.base || "";
+  var PERIODO = CFG.periodo || "2006&ndash;2011";
+  var LEDE = CFG.lede || ('Cada hilo es la trayectoria de un diputado al votar los proyectos de ley ' +
+    'entre 2006 y 2011. Cuanto m&aacute;s arriba, m&aacute;s opositor; cuanto m&aacute;s abajo, m&aacute;s oficialista. ' +
+    'Pas&aacute; el cursor por una l&iacute;nea o una provincia para destacarla.');
+  var DATOS = CFG.datos || "Datos 2006&ndash;2011 &middot; UBA &middot; Maestr&iacute;a en Explotaci&oacute;n de Datos";
 
   // ---- 1. set theme ASAP ----
   function currentTheme() {
@@ -59,9 +67,9 @@
       l.setAttribute("data-dipvis-favicon", "");
       head.appendChild(l);
     }
-    icon("icon", "favicon.svg", "image/svg+xml");
-    icon("icon", "favicon-32.png", "image/png", "32x32");
-    icon("apple-touch-icon", "apple-touch-icon.png");
+    icon("icon", BASE + "favicon.svg", "image/svg+xml");
+    icon("icon", BASE + "favicon-32.png", "image/png", "32x32");
+    icon("apple-touch-icon", BASE + "apple-touch-icon.png");
   })();
 
   // ---- helpers ----
@@ -88,7 +96,7 @@
         '<span class="brand-mark"></span>' +
         '<span class="brand-text">' +
         '<span class="brand-name">DipVis</span>' +
-        '<span class="brand-sub">posturas legislativas &middot; 2006&ndash;2011</span>' +
+        '<span class="brand-sub">posturas legislativas &middot; ' + PERIODO + '</span>' +
         "</span>";
       var li = el("li", "brand-li");
       li.appendChild(brand);
@@ -143,9 +151,7 @@
       var head = el("div", "viz-head",
         '<p class="viz-kicker">C&aacute;mara de Diputados &middot; Argentina</p>' +
         '<h1 class="viz-title">El pulso del voto, diputado por diputado</h1>' +
-        '<p class="viz-lede">Cada hilo es la trayectoria de un diputado al votar los proyectos de ley ' +
-        'entre 2006 y 2011. Cuanto m&aacute;s arriba, m&aacute;s opositor; cuanto m&aacute;s abajo, m&aacute;s oficialista. ' +
-        'Pas&aacute; el cursor por una l&iacute;nea o una provincia para destacarla.</p>');
+        '<p class="viz-lede">' + LEDE + '</p>');
       shell.appendChild(head);
       shell.appendChild(table);
     }
@@ -164,7 +170,7 @@
     if (posturas && !posturas.querySelector(".panel-cap")) {
       var cap = el("div", "panel-cap");
       cap.innerHTML =
-        '<span class="pc-title">Posturas de voto, 2006&ndash;2011</span>' +
+        '<span class="pc-title">Posturas de voto, ' + PERIODO + '</span>' +
         '<div class="viz-legend" style="padding:0;border:none;background:none">' +
         '<span class="lg op"><span class="sw"></span><b>Opositora</b></span>' +
         '<span class="lg va"><span class="sw"></span><b>Variable</b></span>' +
@@ -216,10 +222,10 @@
       '<span class="dot"></span>' +
       '<span>DipVis &mdash; visualizaci&oacute;n de posturas legislativas</span>' +
       '<span>&middot;</span>' +
-      '<span>Datos 2006&ndash;2011 &middot; UBA &middot; Maestr&iacute;a en Explotaci&oacute;n de Datos</span>' +
-      '<span style="margin-left:auto"><a href="equipo.html">Equipo</a> &middot; ' +
-      '<a href="datosOriginales.html">Datos</a> &middot; ' +
-      '<a href="disclaimer.html">Aclaraciones</a></span>';
+      '<span>' + DATOS + '</span>' +
+      '<span style="margin-left:auto"><a href="' + BASE + 'equipo.html">Equipo</a> &middot; ' +
+      '<a href="' + BASE + 'datosOriginales.html">Datos</a> &middot; ' +
+      '<a href="' + BASE + 'disclaimer.html">Aclaraciones</a></span>';
     document.body.appendChild(f);
   }
 

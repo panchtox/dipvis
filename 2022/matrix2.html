@@ -1,0 +1,312 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+	<head>
+		<script>(function(){try{var p=new URLSearchParams(location.search).get('theme');var t=p||localStorage.getItem('dipvis-theme')||'editorial';if(['editorial','minimal','ink'].indexOf(t)<0)t='editorial';document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+		<meta charset="UTF-8" />
+		<script>
+		window.DIPVIS = {
+			base: "../",
+			periodo: "2022&ndash;2026",
+			anios: [2022, 2026],
+			lede: "Cada hilo es la trayectoria de un diputado al votar en la C&aacute;mara entre 2022 y 2026. " +
+				"Cuanto m&aacute;s arriba, m&aacute;s cerca de La Libertad Avanza y el PRO; cuanto m&aacute;s abajo, m&aacute;s cerca del peronismo y la izquierda. " +
+				"El color dice si estuvo en el bloque del gobierno de cada a&ntilde;o: el Frente de Todos hasta 2023, La Libertad Avanza desde 2024. " +
+				"2026 incluye las votaciones desde que asumi&oacute; la C&aacute;mara nueva, el 10/12/2025. " +
+				"Pas&aacute; el cursor por una l&iacute;nea o una provincia para destacarla.",
+			datos: "Datos 2022&ndash;2026 &middot; votaciones nominales de la HCDN hasta el 9/9/2026",
+			flechas: { "ofi-opo": "&rarr; LLA/PRO", "opo-ofi": "&rarr; peronismo" }
+		};
+		</script>
+
+		<link rel="stylesheet" type="text/css" href="../styles/menu.css">
+		<link rel="stylesheet" href="../styles/matrix.css">
+		<script src="https://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+		<script type="text/JavaScript" src="//ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
+	</head>
+	<body>
+		<!-- DipVis theme layer -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=Archivo:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../styles/theme.css">
+<script src="../theme-init.js"></script>
+		<ul class="menu">
+			<li><a href="index.html">Home</a></li>
+			<li><a>Posturas de voto</a>
+				<ul>
+					<li><a href="../datosOriginales.html">Definici&oacute;n y datos originales</a></li>
+					<li><a href="../disclaimer.html">Aclaraciones</a></li>
+				</ul>
+			</li>
+			<li><a>Cr&eacute;ditos</a>
+				<ul>
+					<li><a href="../equipo.html">Equipo de trabajo</a></li>
+					<li><a href="../agradecimientos.html">Agradecimientos</a></li>
+				</ul>
+			</li>
+			<li><a>Tutorial</a>
+		<ul>
+			<li><a href="../tutorialMatrix.html">Mapa de calor</a></li>
+		</ul>
+	</li>
+			<li><a href="../">2006&ndash;2011</a></li>
+			<li><a href="../requerimientos.html">Requerimientos</a>
+			</li>
+		</ul>
+		<table>
+			<tr>
+				<td id="controls">
+						<p id="nombreProvincia"></p>
+						<p>Orden:
+						<select id="order">
+							<option value="nombre">por Nombre</option>
+							<option value="idp">por punto ideal</option>
+							<option value="bloque">por Bloque</option>
+						</select>
+						<p>Periodo:
+						<select id="year">
+							<option value="2022">2022</option>
+							<option value="2023">2023</option>
+							<option value="2024">2024</option>
+							<option value="2025">2025</option>
+							<option value="2026" selected>2026</option>
+						</select>
+				</td>
+				<td id="heatmap"></td>
+				<td id="refBloque"></td>
+				<td>
+					<div id="near">
+						<table>
+							<tr><td id="n0" colspan="2" ><img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"><br /><a href="" class="nombre"></a></td></tr>
+							<tr><td id="n1"><img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"><br /><a href="" class="nombre"></a></td><td id="n2"><img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"><br /><a href="" class="nombre"></a></td></tr>
+							<tr><td id="n3"><img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"><br /><a href="" class="nombre"></a></td><td id="n4"><img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"><br /><a href="" class="nombre"></a></td></tr>
+							<tr><td id="n5"><img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"><br /><a href="" class="nombre"></a></td><td id="n6"><img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"><br /><a href="" class="nombre"></a></td></tr>
+						</table>
+					</div>
+				</td>
+			</tr>
+		</table>
+	<script type="text/javascript">
+	var prov = document.URL.split('#')[1];
+	var provName = document.URL.split('#')[2];
+	if(!prov){ prov = '6'; }                 // por defecto: provincia más grande
+	if(!provName){ provName = 'Buenos Aires'; }
+	provName = provName.replace(/%20/g,' ');	
+	console.log(prov);
+	var vwWidth=document.documentElement.clientWidth;
+	var margin = {top: 150, right: 0, bottom: 10, left: 150}, wmx = vwWidth*0.40, hmx = wmx;
+	var x = d3.scale.ordinal().rangeBands([0, wmx]), z = d3.scale.linear().domain([4, 0]).clamp(true), c = d3.scale.ordinal().range(["#2f5d86","#bd7a36","#5d7d39","#8a4f9e","#3f9d92","#c2553f","#7d6a4f","#4a7bb5","#9c8a3d","#b0608a"]);
+	var data, matrix, ord;
+	var nodes=[], bloques=[], regiones=[];
+
+	traerDatos('2026',prov);
+
+	function traerDatos(selYear,selProv){
+		d3.json("data/matrix.json", function(json) {
+			data=json.datosMatrix;
+			drawMatrix(selYear,selProv);
+		});
+	}
+
+			function drawMatrix(ye,reg){
+			var svg2 = d3.select("#heatmap").append("svg")
+				.attr("width", wmx + margin.left + margin.right)
+				.attr("height", hmx + margin.top + margin.bottom)
+				.attr("id","svgmatrix")
+				// .style("margin-left", margin.left + "px")
+				.append("g")
+					.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+			bloques=[];
+			// provincias=[];
+			data.forEach(
+					function(d){
+						if (d.year==ye && d.distrito==reg) {
+							nodes.push(d);
+						};
+					}
+				);
+			matrix = [],
+			n = nodes.length;
+
+			nodes.forEach(function(node, i) {
+				node.index = i;
+				node.count = 0;
+				matrix[i] = d3.range(n).map(function(j) { return {x: j, y: i, z: 0}; });
+			});
+			var dists=[];
+			nodes.forEach(function(i,k) {
+				nodes.forEach(function(j,l){
+						var dist=Math.abs(i.idp-j.idp);
+						dists.push(dist);
+						matrix[k][l].z=dist;
+						}
+					);
+			});
+			nodes.forEach(function(b){if(bloques.indexOf(b.bloque)>-1){}else{bloques.push(b.bloque)}});
+			// dips.forEach(function(p){if(provincias.indexOf(p.provincia)>-1 || p.provincia==""){}else{provincias.push(p.provincia)}});
+			// provincias=provincias.sort();
+			
+			var orders = {
+				nombre: d3.range(n).sort(function(a, b) { return d3.ascending(nodes[a].nombre, nodes[b].nombre); }),
+				idp: d3.range(n).sort(function(a, b) { return nodes[b].idp - nodes[a].idp; }),
+				bloque: d3.range(n).sort(function(a, b) { return d3.ascending(nodes[b].bloque , nodes[a].bloque); })
+				// ,prov: d3.range(n).sort(function(a, b) { return d3.ascending(nodes[b].distrito , nodes[a].distrito); })
+			};
+
+			// Respetar el orden elegido por el usuario: se mantiene al cambiar de año.
+			var selOrder = document.getElementById("order").value;
+			if (!orders[selOrder]) selOrder = "nombre";
+			x.domain(orders[selOrder]);
+
+			svg2.append("rect")
+				.attr("class", "background")
+				.attr("width", wmx)
+				.attr("height", hmx);
+
+			var row = svg2.selectAll(".row")
+				.data(matrix)
+				.enter().append("g")
+				.attr("class", "row")
+				.attr("transform", function(d, i) { return "translate(0," + x(i) + ")"; })
+				.each(row);
+
+			row.append("line")
+				.attr("x2", wmx);
+
+			row.append("text")
+				.attr("x", -6)
+				.attr("y", x.rangeBand() / 2)
+				.attr("dy", ".32em")
+				.attr("text-anchor", "end")
+				.attr("id",function(d,i){return ("matrix"+d[i].y)})//nodes[i].id
+				.text(function(d, i) { return nodes[i].nombre; })
+				.on("mouseover",function() {reversarIDmatrix(d3.select(this).attr("id"));
+							d3.select(this).attr("fill","blue")})
+				.on("mouseout",function() {
+							d3.select(this).attr("fill","black")})
+				;
+
+			var column = svg2.selectAll(".column")
+				.data(matrix)
+				.enter().append("g")
+				.attr("class", "column")
+				.attr("transform", function(d, i) { return "translate(" + x(i) + ")rotate(-90)"; });
+
+			column.append("line")
+				.attr("x1", -wmx);
+
+			column.append("text")
+				.attr("x", 6)
+				.attr("y", x.rangeBand() / 2)
+				.attr("dy", ".32em")
+				.attr("text-anchor", "start")
+				.text(function(d, i) { return nodes[i].nombre; });
+
+			$('.bloque-row').remove();
+			for(b in bloques){
+				var rowb = d3.select("#refBloque").append("div").attr("class","bloque-row");
+				rowb.append("div")
+					.attr("class","bloqueref")
+					.style("background-color",c(bloques[b]));
+				rowb.append("div")
+					.attr("class","bloquetext")
+					.append("p")
+					.text(bloques[b]);
+			}
+
+			document.getElementById('nombreProvincia').innerHTML=provName;
+/********************************Funciones************************************/
+			function row(row) {
+				var cell = d3.select(this).selectAll(".cell")
+					.data(row.filter(function(d) { return d.z; }))
+					.enter().append("rect")
+						.attr("class", "cell")
+						.attr("x", function(d) { return x(d.x); })
+						.attr("width", x.rangeBand())
+						.attr("height", x.rangeBand())
+						.style("fill-opacity", function(d) { return z(d.z); })
+						.style("fill", function(d) {return nodes[d.x].bloque == nodes[d.y].bloque ? c(nodes[d.x].bloque) : null; })
+					.on("mouseover", mouseover)
+					.on("mouseout", mouseout);
+			}
+
+			function mouseover(p) {
+				d3.selectAll(".row text").classed("active", function(d, i) { return i == p.y; });
+				d3.selectAll(".column text").classed("active", function(d, i) { return i == p.x; });
+			}
+
+			function mouseout() {
+				d3.selectAll("text").classed("active", false); 
+			}
+
+			d3.select("#order").on("change", function() {
+				order(this.value);
+			});
+
+			function order(value) {
+					x.domain(orders[value]);
+					var t = svg2.transition().duration(2500);
+
+					t.selectAll(".row")
+					.delay(function(d, i) { return x(i) * 4; })
+					.attr("transform", function(d, i) { return "translate(0," + x(i) + ")"; })
+					.selectAll(".cell")
+					.delay(function(d) { return x(d.x) * 4; })
+					.attr("x", function(d) { return x(d.x); });
+
+					t.selectAll(".column")
+					.delay(function(d, i) { return x(i) * 4; })
+					.attr("transform", function(d, i) { return "translate(" + x(i) + ")rotate(-90)"; });
+				}
+			}
+
+function reversarIDmatrix(id){
+	var aidi=id.replace("matrix","");
+	// console.log(aidi);
+	sorte=d3.range(n).sort(function(a, b) { return matrix[aidi][a].z - matrix[aidi][b].z; });
+	var perfil={'near':[],'far':[]};
+	for (var i = 0; i < 7; i++) {
+		perfil.near[i]=sorte[i];
+		perfil.far[i]=sorte[sorte.length-i-1];
+	}
+	for (var i = 0; i < perfil.near.length; i++) {
+		// console.log("n:"+nodes[perfil.near[i]].nombre);
+		d3.select('#n'+(i)+" img").attr("src","../images/"+nodes[perfil.near[i]].foto);
+		d3.select("#n"+i+" a").attr("href","http://www.google.com.ar/search?q="+(nodes[perfil.near[i]].nombre).replace(" ","+"))
+		.attr("target","_blank").text(nodes[perfil.near[i]].nombre);
+		if (i%2==0 && i!=0) {
+			d3.select('#n'+(i)).style("border-left","2px solid "+c(nodes[perfil.near[i]].bloque));
+		} 
+		else{
+			if (i==0) {
+				d3.select('#n'+(i)).style("border-bottom","2px solid "+c(nodes[perfil.near[i]].bloque));
+			}else{
+				d3.select('#n'+(i)).style("border-right","2px solid "+c(nodes[perfil.near[i]].bloque));
+			};
+		};
+		d3.select('#near').selectAll("td").attr("align","center");
+	};
+}
+
+// Cambiar año cuando se seleccione una opción diferente
+$("#year").on('change', function(){
+    var V = $(this).val();
+    console.log("Año seleccionado: " + V);
+    d3.select("#svgmatrix").remove();
+    nodes = [];
+    ye = V;
+    drawMatrix(ye, prov);   // drawMatrix lee el orden actual del <select> y lo conserva
+});
+		</script>
+	</body>
+	<script>
+	  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+	  ga('create', 'UA-44984023-1', 'dipvis.org');
+	  ga('send', 'pageview');
+	</script>
+</html>

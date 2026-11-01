@@ -1,0 +1,424 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+	<head>
+		<script>(function(){try{var p=new URLSearchParams(location.search).get('theme');var t=p||localStorage.getItem('dipvis-theme')||'editorial';if(['editorial','minimal','ink'].indexOf(t)<0)t='editorial';document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+		<meta charset="UTF-8" />
+		<script>
+		window.DIPVIS = {
+			base: "../",
+			periodo: "2022&ndash;2026",
+			anios: [2022, 2026],
+			lede: "Cada hilo es la trayectoria de un diputado al votar en la C&aacute;mara entre 2022 y 2026. " +
+				"Cuanto m&aacute;s arriba, m&aacute;s cerca de La Libertad Avanza y el PRO; cuanto m&aacute;s abajo, m&aacute;s cerca del peronismo y la izquierda. " +
+				"El color dice si estuvo en el bloque del gobierno de cada a&ntilde;o: el Frente de Todos hasta 2023, La Libertad Avanza desde 2024. " +
+				"2026 incluye las votaciones desde que asumi&oacute; la C&aacute;mara nueva, el 10/12/2025. " +
+				"Pas&aacute; el cursor por una l&iacute;nea o una provincia para destacarla.",
+			datos: "Datos 2022&ndash;2026 &middot; votaciones nominales de la HCDN hasta el 9/9/2026",
+			flechas: { "ofi-opo": "&rarr; LLA/PRO", "opo-ofi": "&rarr; peronismo" }
+		};
+		</script>
+
+		<link rel="stylesheet" type="text/css" href="../styles/menu.css">
+		<link rel="stylesheet" href="../styles/idps.css">
+		<link rel="stylesheet" href="../styles/chosen.css">
+		<script src="https://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+		<script type="text/JavaScript" src="//ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
+		<script src="../lib/jquery.sparkline.min.js"></script>
+		<script src="../lib/chosen.jquery.js" type="text/javascript"></script>
+		<script type="text/javascript">
+		var dips,ar=Array(),idps=Array();
+		var viewportWidth  = document.documentElement.clientWidth
+			,viewportHeight = document.documentElement.clientHeight;//Toman ancho y alto de pantalla
+		var h=viewportHeight*0.80, w=viewportWidth*0.65, margin1=30,pomo,cuadro=w/4,duration=1500,delay=1000;
+		var color10=d3.scale.category10();//Paleta categorica de 10 colores
+/*
+*COMBO BOX
+*/
+		d3.json("data/combo_nombres.json", function(json) {//trae el json con el listado de nombres con los id correspondientes
+				nombres=json;	
+				for (i=0;i<nombres.length;i++){
+					$('<option/>').val(nombres[i].idip).html(nombres[i].nombre).appendTo('#diputados');
+				}
+				$(".chzn-select").chosen({no_results_text: "No hay: "});$(".chzn-select-deselect").chosen({allow_single_deselect:true});
+		});
+
+		function actualizarFideos() {//Destaca la linea de los diputados seleccionados en el combobox
+			var Dips = recuperar_seleccion('diputados');
+			d3.selectAll('.posturadip').classed('disabled', true);
+			d3.selectAll('.provincia').classed('disabled', true);
+			
+			if (Dips.length) {
+				for (var i = 0; i < Dips.length; i++) {
+					d3.select("#" + Dips[i]).classed('disabled', false);
+					d3.select("#" + Dips[i]).classed('enabled', true);
+					d3.select("#" + Dips[i]).moveToFront();
+
+				};
+			} else{
+				dips.forEach(
+					function(d){
+						d3.select("#dip"+d.id).classed('disabled', false);
+						d3.selectAll('.provincia').classed('disabled', false);
+						d3.select("#dip"+d.id).classed('enabled', false);
+					}
+				);
+			};
+		}
+		function recuperar_seleccion(id) {//Devuelve array con la seleccion del combobox
+			var valores = [];
+			var obj = document.getElementById(id);
+			for(var i=0; i<obj.length; i++) {
+				if (obj[i].selected) {
+					valores.push("dip" + obj[i].value);
+				}
+			}
+			return(valores);
+		}
+/***/
+
+/*
+*Curvas de Andrews de las posturas de los diputados
+*/
+		d3.json("data/fideos_dips2.json", function(json) {//Trae los datos principales
+			dips=json.diputados;
+			dips.forEach(function(d){(d.points.forEach(function(y){ar.push(y.year)}))});//rango de anios
+			dips.forEach(function(d){(d.points.forEach(function(y){idps.push(y.idp)}))});//rango de puntos ideales
+			d3.select("#diputados").style("width",(viewportWidth*0.60)+"px");
+
+			var svg=d3.select("#posturas")
+ 			.style("width",w+"px")
+ 			.append("svg")
+ 			.attr("width",w)
+ 			.attr("height",h);
+
+ 			d3.select("#diputados_chzn").style("width",(w)+"px");//igualo ancho del combobox al del panel del grafico
+
+ 			var capaRef=svg.append("g").attr("class","ref");
+		 	var capa1=svg.append("g").attr("class","fondo1");
+
+		 	var formatYear=d3.time.format("%Y").parse;
+			var idpsXscale=d3.time.scale().domain(window.DIPVIS.anios).range([0+margin1,w-margin1]);
+			var idpsYscale=d3.scale.linear().domain([d3.min(idps),d3.max(idps)]).range([h-margin1,0+margin1]);
+			var color10=d3.scale.category10();
+			idps=0;
+			ar=0;
+			estructura=0;
+			var linefunction = d3.svg.line()
+				.interpolate("basis")
+				.x(function(d) { return idpsXscale(d.year);})
+				.y(function(d) { return idpsYscale(d.idp);});
+
+			dips.forEach(
+				function(d){//fabricamos una linea por cada diputado, reflejando sus posturas en el tiempo
+					var posicion = 'variable';
+					if(d.col == '#bbf098'){
+						posicion = 'opositora';
+					}
+					if(d.col == '#6b9eea'){
+						posicion = 'oficialista';
+					}
+
+					var lineGraph = capa1.append("path")
+						.attr("d", linefunction(d.points))
+						.attr("class","posturadip " + posicion + " p" + d.distrito)
+						.attr("shape-rendering","crispEdges")
+						.attr("id",("dip"+d.id))
+						.attr("nombre",d.nombre)
+						.attr("bloque",d.bloque)
+						.attr("foto",d.foto)
+						.attr("provincia",d.distrito)
+						.on("mouseover", function() {
+							selectCurrent(d3.select(this));
+							selectCurrent(d3.selectAll("#p"+d3.select(this).attr("provincia")));
+							d3.select("#tooltip").select("img").attr("src","");
+							d3.select("#tooltip")
+								.attr("class","")
+								.select("strong")
+								.text(d3.select(this).attr("nombre"));
+							d3.select("#tooltip")
+								.select("bloque")
+								.text(d3.select(this).attr("bloque"));
+							d3.select("#tooltip")
+								.select("img")
+								.attr("src",(d3.select(this).attr("foto")));
+							
+							$('#tristate').sparkline(d.estados, {type:'tristate', posBarColor:'#9cab19',negBarColor:'#1e64cd'});
+						})
+						.on("mouseout", function() {
+							
+							unselectCurrent(d3.select(this));
+							unselectCurrent(d3.selectAll("#p"+d3.select(this).attr("provincia")));
+							
+							d3.select("#tooltip").attr("class","hidden");
+
+						});
+				}
+			);
+			var xAxis=d3.svg.axis().scale(idpsXscale).orient("bottom").tickFormat(d3.format("d"));
+			svg.append("g").attr("class","xaxis").attr("transform","translate(0,"+(h-margin1)+")").call(xAxis);
+
+			capa1.append("text")
+				.attr("x", (w / 2))
+				.attr("y", 20)
+				.attr("text-anchor", "middle")
+				.style("font-size", "16px")
+				.text("Postura de los diputados al votar en la Cámara, 2022 - 2026");
+			/*
+			* Dibuja flechas del eje y
+			*/
+				var capaFlechas=svg.append("g").attr("class","flechas");
+
+				capaFlechas.append("marker")
+					.attr("id", "triangle-start")
+					.attr("viewBox", "0 0 10 10")
+					.attr("refX", 10)
+					.attr("refY", 5)
+					.attr("markerWidth", -6)
+					.attr("markerHeight", 6)
+					.attr("orient", "auto")
+					.append("path")
+					.attr("d", "M 0 0 L 10 5 L 0 10 z");
+
+				capaFlechas.append("marker")
+					.attr("id", "triangle-end")
+					.attr("viewBox", "0 0 10 10")
+					.attr("refX", 10)
+					.attr("refY", 5)
+					.attr("markerWidth", 6)
+					.attr("markerHeight", 6)
+					.attr("orient", "auto")
+					.append("path")
+					.attr("d", "M 0 0 L 10 5 L 0 10 z");
+
+				capaFlechas.append("line")
+					.attr("class", "arrow")
+					.attr("x1", 20)
+					.attr("x2", 20)
+					.attr("y1", idpsYscale(2.2))
+					.attr("y2", idpsYscale(0.02))
+					.attr("marker-start", "url(#triangle-start)")
+					.style("stroke","black");
+				capaFlechas.append("line")
+					.attr("class", "arrow")
+					.attr("x1", 20)
+					.attr("x2", 20)
+					.attr("y1", idpsYscale(-2.2))
+					.attr("y2", idpsYscale(-0.02))
+					.attr("marker-start", "url(#triangle-start)")
+					.style("stroke","black");
+				capaFlechas.append('text')
+					.text('LLA · PRO')
+					.attr('y',idpsYscale(2.3))
+					.attr('x',20);
+				capaFlechas.append('text')
+					.text('Peronismo · izquierda')
+					.attr('y',idpsYscale(-2.3))
+					.attr('x',20);
+			/**/
+			/*
+			* Referencia
+			*/
+				var ref={"posturas":[{"postura":"opositora constante","color":"#bbf098","yrel":1},{"postura":"variable","color":"#f0a198","yrel":2},{"postura":"oficialista constante","color":"#6b9eea","yrel":3}]},sbul=11;
+				capaRef.selectAll('rect')
+					.data(ref.posturas)
+					.enter()
+					.append('rect')
+					.attr('x',w-(w/5))
+					.attr('y',function(d){return h-90+(sbul*d.yrel);})
+					.attr('width',sbul-1)
+					.attr('height',sbul-1)
+					.attr('fill',function(d){return d.color;});
+				capaRef.selectAll('text')
+					.data(ref.posturas)
+					.enter()
+					.append('text')
+					.text(function(d){return d.postura})
+					.attr('x',w-(w/5)+12)
+					.attr('y',function(d){return h-82+(sbul*d.yrel);});
+			/***/
+		});
+
+/* Funcion que permite que un objeto pase al frente de la imagen */
+		d3.selection.prototype.moveToFront = function() {//metodo que hace que un objeto pase al frente de la imagen -CREDITO
+				return this.each(function() { 
+					this.parentNode.appendChild(this); 
+				}); 
+		};
+/***/
+
+
+		</script>
+		
+	</head>
+	<body>
+		<!-- DipVis theme layer -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=Archivo:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../styles/theme.css">
+<script src="../theme-init.js"></script>
+<script src="../olas.js"></script>
+		<ul class="menu">
+			<li><a href="index.html">Home</a></li>
+			<li><a>Posturas de voto</a>
+				<ul>
+					<li><a href="../datosOriginales.html">Definici&oacute;n y datos originales</a></li>
+					<li><a href="../disclaimer.html">Aclaraciones</a></li>
+				</ul>
+			</li>
+			<li><a>Cr&eacute;ditos</a>
+				<ul>
+					<li><a href="../equipo.html">Equipo de trabajo</a></li>
+					<li><a href="../agradecimientos.html">Agradecimientos</a></li>
+				</ul>
+			</li>
+			<li><a>Tutorial</a>
+				<ul>
+					<li><a href="../tutorialMatrix.html">Mapa de calor</a></li>
+				</ul>
+			</li>
+			<li><a href="../">2006&ndash;2011</a></li>
+			<li><a href="../requerimientos.html">Requerimientos</a>
+			</li>
+		</ul>
+		<table>
+			<tr>
+				<td style="padding-left:10px" id="combo">
+					<div>
+						<select data-placeholder="Clickee para seleccionar diputados..." class="chzn-select" multiple="multiple"  id="diputados" onChange="actualizarFideos();">
+							<option value=""></option>
+						</select>
+					</div>
+				</td>
+				<td>
+				</td>
+			</tr>
+			<tr>
+				<td>
+					<div id="posturas"></div>
+				</td>
+				<td>
+					<div id="mapa"></div>
+				</td>
+			</tr>
+		</table>
+		<div id="tooltip" class="hidden">
+			<span id="tristate">Loading..</span>
+			<img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"></img><br>
+			<strong>Diputado</strong><br>
+			<bloque>bloque</bloque>
+		</div>
+		<script type="text/javascript">
+		$(document).ready(function(){//Lleva el tooltip a la posicion cercana al mouse
+			$('#posturas').mousemove(function(e){
+				if (e.pageY<h-margin1+10 && e.pageX<w-margin1+10) {
+					$("#tooltip").css({top: e.pageY, left: e.pageX+30, position:'absolute'});
+				} else{
+				};
+				
+			});
+		});
+		d3.select('#combo').style("width",w+"px");
+
+
+		/*
+		*La parte del mapa
+		*/
+			var mapw=viewportWidth*0.3,maph=h;
+			var mapsvg=d3.select("#mapa")//agregamos un svg para contener el mapa
+					.style("width",viewportWidth*0.30+"px")
+					.style("height",h+"px")
+					.style("margin-left","20px")
+		 			.append("svg")
+		 			.attr("width",mapw)
+		 			.attr("height",maph);
+
+		 	var maplayer1=mapsvg.append("g").attr("class","maplayer1");
+		 	var maplayer2=mapsvg.append("g").attr("class","maplayer1");
+		 	var projection = d3.geo.transverseMercator().center([3, -38]).rotate([66, 0])
+		 	.translate([(mapw / 2), (maph / 2)]).scale((maph * 56.5) / 35);
+		 	var mappath = d3.geo.path().projection(projection);
+		 	var aviso=maplayer1.append('text').text('Cargando mapa...').attr('x',(mapw/2)-80).attr('y',maph/2);
+			d3.json("../maps/provincias.json", function(json) {//Provincias excepto T. del Fuego
+
+				maplayer1.selectAll("path")
+					.data(json.features)
+					.enter()
+					.append("path")
+					.attr("d", mappath)
+					.attr("id",function(d){return "p"+(d.properties.prov);})
+					.attr("provname",function(d){return (d.properties.provincia);})
+					.attr("class","provincia")
+					.on("mouseover", onMouseOver)
+					.on("mouseout", onMouseOut)
+					.on("click", onClick);
+					aviso.text('');
+			});
+
+			d3.json("../maps/TIERRA DEL FUEGO.json", function(json) {//Aqui incorporamos T. del Fuego
+				maplayer2.selectAll("path")
+					.data(json.features)
+					.enter()
+					.append("path")
+					.attr("d", mappath)
+					.attr("id",function(d){return "p"+(d.properties.prov);})
+					.attr("provname",function(d){return (d.properties.PROVINCIA);})
+					.attr("class","provincia")
+					.on("mouseover", onMouseOver)
+					.on("mouseout", onMouseOut)
+					.on("click", onClick);
+			});
+
+			function onClick() {
+				var prov = d3.select(this).attr("id");
+				var provname = d3.select(this).attr("provname");
+				// console.log("onclick!!!", prov);
+				window.location = 'matrix2.html#' + prov.substring(1) + "#" + provname;
+			}
+
+			function onMouseOver() {
+				//Pintar provincia de rojo
+				var prov = d3.selectAll("#" + d3.select(this).attr("id"));
+				selectCurrent(prov);
+
+				//Agregar clase 'current'
+				var lines = d3.selectAll("." + d3.select(this).attr("id"));
+				selectCurrent(lines);
+
+								
+			}
+
+			function onMouseOut() {
+				//Volver al color original
+				var prov = d3.selectAll("#" + d3.select(this).attr("id"));
+				unselectCurrent(prov);
+
+				//Remover classe 'current'
+				var lines = d3.selectAll("." + d3.select(this).attr("id"));
+				unselectCurrent(lines);				
+			}
+
+			function selectCurrent(selection){
+				selection.classed('current', true);
+				// NO usar moveToFront() aqui: reordenar el nodo bajo el cursor durante el
+				// mouseover dispara una cascada de mouseover/mouseout sobre los paths que se
+				// solapan, dejando la clase 'current' (rojo) pegada y tragando el click en
+				// las provincias. El resaltado en rojo via CSS ya distingue el elemento.
+			}
+
+			function unselectCurrent(selection){
+				selection.classed('current', false);
+			}			
+		</script>
+	</body>
+	<script>
+	  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+	  ga('create', 'UA-44984023-1', 'dipvis.org');
+	  ga('send', 'pageview');
+
+	</script>
+</html>
