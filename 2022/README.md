@@ -4,7 +4,7 @@ La misma visualización que 2006–2011 (fideos por diputado, mapa y mapa de cal
 
 - **Puntos ideales:** `armar/01_puntos_ideales.R` (pscl::ideal, normalizado; signo orientado con diputados de referencia: LLA y PRO positivos, peronismo e izquierda negativos). Cada período se estima por separado: la altura compara a los diputados de un mismo año, no a un año con otro.
 - **2025 partido en dos:** «2025» llega hasta el 9/12/2025; las votaciones desde que asumió la Cámara nueva (10/12/2025) van a «2026».
-- **Color:** respecto del gobierno de cada año (Frente de Todos en 2022–2023, La Libertad Avanza desde 2024). Oficialista si siempre estuvo en ese bloque, opositora si nunca, variable si cambió.
+- **Color:** según el paso por el bloque La Libertad Avanza: violeta si estuvo en LLA en todos sus períodos, ámbar si en algunos, verde azulado si nunca. La paleta está en `2022/paleta.css`.
 - **Fotos:** todavía no hay; se usa la silueta.
 
 Regenerar los datos:

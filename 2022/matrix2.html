@@ -10,10 +10,11 @@
 			anios: [2022, 2026],
 			lede: "Cada hilo es la trayectoria de un diputado al votar en la C&aacute;mara entre 2022 y 2026. " +
 				"Cuanto m&aacute;s arriba, m&aacute;s cerca de La Libertad Avanza y el PRO; cuanto m&aacute;s abajo, m&aacute;s cerca del peronismo y la izquierda. " +
-				"El color dice si estuvo en el bloque del gobierno de cada a&ntilde;o: el Frente de Todos hasta 2023, La Libertad Avanza desde 2024. " +
+				"El color dice si estuvo en el bloque de La Libertad Avanza: en todos sus a&ntilde;os (violeta), en algunos (&aacute;mbar) o nunca. " +
 				"2026 incluye las votaciones desde que asumi&oacute; la C&aacute;mara nueva, el 10/12/2025. " +
 				"Pas&aacute; el cursor por una l&iacute;nea o una provincia para destacarla.",
 			datos: "Datos 2022&ndash;2026 &middot; votaciones nominales de la HCDN hasta el 9/9/2026",
+			leyenda: { op: "Nunca en LLA", va: "Pas&oacute; por LLA", of: "Siempre en LLA" },
 			flechas: { "ofi-opo": "&rarr; LLA/PRO", "opo-ofi": "&rarr; peronismo" }
 		};
 		</script>
@@ -29,6 +30,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=Archivo:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../styles/theme.css">
+<link rel="stylesheet" href="paleta.css">
 <script src="../theme-init.js"></script>
 		<ul class="menu">
 			<li><a href="index.html">Home</a></li>
@@ -95,7 +97,7 @@
 	console.log(prov);
 	var vwWidth=document.documentElement.clientWidth;
 	var margin = {top: 150, right: 0, bottom: 10, left: 150}, wmx = vwWidth*0.40, hmx = wmx;
-	var x = d3.scale.ordinal().rangeBands([0, wmx]), z = d3.scale.linear().domain([4, 0]).clamp(true), c = d3.scale.ordinal().range(["#2f5d86","#bd7a36","#5d7d39","#8a4f9e","#3f9d92","#c2553f","#7d6a4f","#4a7bb5","#9c8a3d","#b0608a"]);
+	var x = d3.scale.ordinal().rangeBands([0, wmx]), z = d3.scale.linear().domain([4, 0]).clamp(true), c = d3.scale.ordinal().domain(["La Libertad Avanza"]).range(["#6a3fa0","#bd7a36","#5d7d39","#2f5d86","#3f9d92","#c2553f","#7d6a4f","#4a7bb5","#9c8a3d","#b0608a"]);
 	var data, matrix, ord;
 	var nodes=[], bloques=[], regiones=[];
 

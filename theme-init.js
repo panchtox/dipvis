@@ -16,6 +16,7 @@
     'entre 2006 y 2011. Cuanto m&aacute;s arriba, m&aacute;s opositor; cuanto m&aacute;s abajo, m&aacute;s oficialista. ' +
     'Pas&aacute; el cursor por una l&iacute;nea o una provincia para destacarla.');
   var DATOS = CFG.datos || "Datos 2006&ndash;2011 &middot; UBA &middot; Maestr&iacute;a en Explotaci&oacute;n de Datos";
+  var LEYENDA = CFG.leyenda || { op: "Opositora", va: "Variable", of: "Oficialista" };
 
   // ---- 1. set theme ASAP ----
   function currentTheme() {
@@ -172,9 +173,9 @@
       cap.innerHTML =
         '<span class="pc-title">Posturas de voto, ' + PERIODO + '</span>' +
         '<div class="viz-legend" style="padding:0;border:none;background:none">' +
-        '<span class="lg op"><span class="sw"></span><b>Opositora</b></span>' +
-        '<span class="lg va"><span class="sw"></span><b>Variable</b></span>' +
-        '<span class="lg of"><span class="sw"></span><b>Oficialista</b></span>' +
+        '<span class="lg op"><span class="sw"></span><b>' + LEYENDA.op + '</b></span>' +
+        '<span class="lg va"><span class="sw"></span><b>' + LEYENDA.va + '</b></span>' +
+        '<span class="lg of"><span class="sw"></span><b>' + LEYENDA.of + '</b></span>' +
         "</div>";
       posturas.insertBefore(cap, posturas.firstChild);
     }

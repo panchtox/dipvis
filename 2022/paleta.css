@@ -1,0 +1,33 @@
+/* ============================================================
+   DipVis 2022–2026 — paleta propia
+   oficialista = siempre en LLA (violeta, el color con que se identifica el espacio)
+   variable    = pasó por LLA en algún período (ámbar)
+   opositora   = nunca en LLA (verde azulado apagado: es la mayoría, no tiene que tapar al violeta)
+   Se carga después de styles/theme.css. Los colores van literales por tema, igual que en
+   theme.css, porque var() en el stroke de SVG no se reevalúa al cambiar de tema en Chromium.
+   ============================================================ */
+:root[data-theme="editorial"] { --c-of: #6a3fa0; --c-va: #cf8a1c; --c-op: #4f8a8b; }
+:root[data-theme="minimal"]   { --c-of: #7044c9; --c-va: #e09a1a; --c-op: #3d8f95; }
+:root[data-theme="ink"]       { --c-of: #c39bff; --c-va: #f2b84b; --c-op: #4f9499; }
+
+[data-theme="editorial"] .posturadip.oficialista,
+[data-theme="editorial"] .posturadip.oficialista.enabled { stroke: #6a3fa0; }
+[data-theme="editorial"] .posturadip.variable,
+[data-theme="editorial"] .posturadip.variable.enabled    { stroke: #cf8a1c; }
+[data-theme="editorial"] .posturadip.opositora,
+[data-theme="editorial"] .posturadip.opositora.enabled   { stroke: #4f8a8b; }
+
+[data-theme="minimal"] .posturadip.oficialista,
+[data-theme="minimal"] .posturadip.oficialista.enabled { stroke: #7044c9; }
+[data-theme="minimal"] .posturadip.variable,
+[data-theme="minimal"] .posturadip.variable.enabled    { stroke: #e09a1a; }
+[data-theme="minimal"] .posturadip.opositora,
+[data-theme="minimal"] .posturadip.opositora.enabled   { stroke: #3d8f95; }
+
+[data-theme="ink"] .posturadip.oficialista,
+[data-theme="ink"] .posturadip.oficialista.enabled { stroke: #c39bff; }
+[data-theme="ink"] .posturadip.variable,
+[data-theme="ink"] .posturadip.variable.enabled    { stroke: #f2b84b; }
+[data-theme="ink"] .posturadip.opositora,
+[data-theme="ink"] .posturadip.opositora.enabled   { stroke: #4f9499; }
+/* el resaltado al pasar el cursor y lo atenuado siguen saliendo de theme.css: esas reglas tienen una clase más */
