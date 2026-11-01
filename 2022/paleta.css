@@ -1,8 +1,8 @@
 /* ============================================================
    DipVis 2022–2026 — paleta propia
-   oficialista = siempre en LLA (violeta, el color con que se identifica el espacio)
-   variable    = pasó por LLA en algún período (ámbar)
-   opositora   = nunca en LLA (verde azulado apagado: es la mayoría, no tiene que tapar al violeta)
+   oficialista = la línea siempre del lado de LLA, arriba del cero (violeta, el color con que se identifica el espacio)
+   variable    = cambió de signo en algún período (ámbar)
+   opositora   = siempre del lado opositor, debajo del cero (verde azulado apagado)
    Se carga después de styles/theme.css. Los colores van literales por tema, igual que en
    theme.css, porque var() en el stroke de SVG no se reevalúa al cambiar de tema en Chromium.
    ============================================================ */

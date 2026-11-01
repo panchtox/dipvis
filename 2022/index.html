@@ -10,11 +10,11 @@
 			anios: [2022, 2026],
 			lede: "Cada hilo es la trayectoria de un diputado al votar en la C&aacute;mara entre 2022 y 2026. " +
 				"Cuanto m&aacute;s arriba, m&aacute;s cerca de La Libertad Avanza y el PRO; cuanto m&aacute;s abajo, m&aacute;s cerca del peronismo y la izquierda. " +
-				"El color dice si estuvo en el bloque de La Libertad Avanza: en todos sus a&ntilde;os (violeta), en algunos (&aacute;mbar) o nunca. " +
+				"El color dice de qu&eacute; lado del cero queda la l&iacute;nea: siempre del lado de LLA (violeta), siempre del lado opositor (verde azulado) o si cambi&oacute; de lado (&aacute;mbar). " +
 				"2026 incluye las votaciones desde que asumi&oacute; la C&aacute;mara nueva, el 10/12/2025. " +
 				"Pas&aacute; el cursor por una l&iacute;nea o una provincia para destacarla.",
 			datos: "Datos 2022&ndash;2026 &middot; votaciones nominales de la HCDN hasta el 9/9/2026",
-			leyenda: { op: "Nunca en LLA", va: "Pas&oacute; por LLA", of: "Siempre en LLA" },
+			leyenda: { op: "Siempre opositor", va: "Cambi&oacute; de lado", of: "Siempre del lado de LLA" },
 			flechas: { "ofi-opo": "&rarr; LLA/PRO", "opo-ofi": "&rarr; peronismo" }
 		};
 		</script>
@@ -219,7 +219,7 @@
 			/*
 			* Referencia
 			*/
-				var ref={"posturas":[{"postura":"nunca en LLA","color":"#4f8a8b","yrel":1},{"postura":"pasó por LLA","color":"#cf8a1c","yrel":2},{"postura":"siempre en LLA","color":"#6a3fa0","yrel":3}]},sbul=11;
+				var ref={"posturas":[{"postura":"siempre opositor","color":"#4f8a8b","yrel":1},{"postura":"cambió de lado","color":"#cf8a1c","yrel":2},{"postura":"siempre del lado de LLA","color":"#6a3fa0","yrel":3}]},sbul=11;
 				capaRef.selectAll('rect')
 					.data(ref.posturas)
 					.enter()

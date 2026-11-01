@@ -4,8 +4,9 @@ Mismo formato que data/ de 2006-2011:
 - fideos_dips2.json: una línea por diputado (nombre, bloque, distrito, color, puntos por año)
 - combo_nombres.json: id y nombre para el buscador
 - matrix.json: una fila por diputado y año, para el mapa de calor por provincia
-Color: según el paso por el bloque La Libertad Avanza. «oficialista» = estuvo en LLA en todos sus períodos,
-«variable» = en algunos sí y en otros no, «opositora» = nunca. (Los nombres de clase son los del sitio original.)
+Color: según de qué lado del cero queda la línea. El lado oficialista es el de LLA (punto ideal positivo).
+«oficialista» = positivo en todos sus períodos, «opositora» = negativo en todos, «variable» = cambió de signo.
+(Los nombres de clase son los del sitio original.)
 Uso, parados en 2022/armar/:  python 02_armar_json.py
 """
 import json
@@ -16,7 +17,6 @@ AQUI = Path(__file__).parent
 DATA = AQUI.parent / "data"
 DATA.mkdir(exist_ok=True)
 
-ESPACIO_LLA = {"La Libertad Avanza"}
 COLOR = {"oficialista": "#6b9eea", "opositora": "#bbf098", "variable": "#f0a198"}   # los del sitio original
 PROV = {  # provincia del scraper -> (código INDEC que usa maps/provincias.json, región de la matriz original)
     "Buenos Aires": (6, "BUENOS AIRES"), "C.A.B.A.": (2, "CABA"), "Catamarca": (10, "NOROESTE"),
@@ -43,7 +43,7 @@ leg = pd.read_csv(AQUI / "legisladores.csv").rename(columns={"legislador": "nomb
 d = idps.merge(leg, on=["nombre", "anio"], how="left")
 faltan = d[d.provincia.isna() | ~d.provincia.isin(PROV)]
 assert faltan.empty, faltan
-d["oficialista"] = d.bloque.isin(ESPACIO_LLA)
+d["oficialista"] = d.idp > 0          # del lado de LLA
 
 nombres = sorted(d.nombre.unique(), key=lambda n: lindo(n))
 ids = {n: i + 1 for i, n in enumerate(nombres)}
@@ -70,4 +70,4 @@ for n in nombres:
 
 print(f"{len(fideos)} diputados, {len(matriz)} filas diputado-año")
 print(pd.Series([f["col"] for f in fideos]).map({v: k for k, v in COLOR.items()}).value_counts().to_string())
-print(d.groupby("anio").agg(diputados=("nombre", "size"), en_LLA=("oficialista", "sum")).to_string())
+print(d.groupby("anio").agg(diputados=("nombre", "size"), lado_LLA=("oficialista", "sum")).to_string())
