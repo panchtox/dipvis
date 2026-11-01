@@ -90,7 +90,7 @@ for n in nombres:
     fideos.append({"nombre": lindo(n), "foto": foto, "distrito": str(cod),
                    "provincia": ultimo.provincia, "bloque": ultimo.bloque, "id": ids[n],
                    "points": [{"year": int(a), "idp": round(float(v), 4)} for a, v in zip(g.anio, g.idp)],
-                   "col": COLOR[postura], "estados": [round(float(v), 4) for v in g.idp]})
+                   "col": COLOR[postura], "estados": [int(v) for v in g.lado]})   # barras de la tarjeta: 1, -1 o 0 (sin lado claro)
     combo.append({"idip": ids[n], "nombre": lindo(n)})
     for _, r in g.iterrows():
         c, reg = PROV[r.provincia]

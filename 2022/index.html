@@ -147,7 +147,10 @@
 								.select("img")
 								.attr("src",(d3.select(this).attr("foto")));
 							
-							$('#tristate').sparkline(d.estados, {type:'tristate', posBarColor:'#9cab19',negBarColor:'#1e64cd'});
+							// barras de la tarjeta: arriba = año del lado de LLA, abajo = del lado opositor, raya chica = ese año sin lado claro
+							var css = getComputedStyle(document.documentElement);
+							$('#tristate').sparkline(d.estados, {type:'tristate', barWidth:6, zeroAxis:true,
+								posBarColor: css.getPropertyValue('--c-of').trim(), negBarColor: css.getPropertyValue('--c-op').trim(), zeroBarColor: '#9a958c'});
 						})
 						.on("mouseout", function() {
 							
