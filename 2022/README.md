@@ -17,3 +17,5 @@ Rscript 01_puntos_ideales.R <carpeta con sesiones_dt.csv.gz e info_sesiones_dt.c
 python 03_bajar_fotos.py <misma carpeta>                                              # fotos -> 2022/fotos/ (después se achican a 120 px)
 python 02_armar_json.py                                                                # escribe 2022/data/*.json
 ```
+
+**Barras de la tarjeta.** Una barra por año: arriba y en violeta si ese año quedó claramente del lado de LLA, abajo y en verde azulado si quedó del lado opositor, y una raya gris chica si el intervalo tocó el cero. Es la misma regla que define el color de la línea.
