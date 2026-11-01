@@ -5,7 +5,10 @@ Mismo formato que data/ de 2006-2011:
 - combo_nombres.json: id y nombre para el buscador
 - matrix.json: una fila por diputado y año, para el mapa de calor por provincia
 Color: según de qué lado del cero queda la línea. El lado oficialista es el de LLA (punto ideal positivo).
-«oficialista» = positivo en todos sus períodos, «opositora» = negativo en todos, «variable» = cambió de signo.
+Cada punto tiene lado sólo si su intervalo del 95% no toca el cero; si lo toca, no cuenta.
+«oficialista» = sus puntos con lado están todos del lado de LLA, «opositora» = todos del otro,
+«variable» = tiene puntos claros de los dos lados. Si ningún punto tiene lado claro, decide el signo del promedio.
+Los períodos con menos de MIN_VOTOS votos emitidos no se dibujan (p. ej. quien presidió la Cámara ese año).
 (Los nombres de clase son los del sitio original.)
 Uso, parados en 2022/armar/:  python 02_armar_json.py
 """
@@ -28,6 +31,7 @@ PROV = {  # provincia del scraper -> (código INDEC que usa maps/provincias.json
     "Tierra del Fuego": (94, "SUR"), "Tucumán": (90, "NOROESTE"),
 }
 SILUETA = "../images/silueta_medium.jpg"
+MIN_VOTOS = 20
 # la misma persona escrita de dos maneras en las actas de la HCDN
 ALIAS = {"LOPEZ, Jimena": "LOPEZ, JIMENA", "RODRIGUEZ MACHADO, LAURA ELENA": "RODRIGUEZ MACHADO, LAURA",
          "PRADES, C. FACUNDO": "PRADES, CARLOS FACUNDO"}
@@ -57,7 +61,11 @@ d["nombre"] = d.nombre.replace(ALIAS)
 # variantes de comillas en los apodos (ALI, ERNESTO "PIPI"): se unifican por la forma normalizada
 d["nombre"] = d.groupby(d.nombre.map(clave)).nombre.transform("first")
 # si con el alias quedan dos filas el mismo año, vale la que tiene más votos
-d = d.sort_values("votos", ascending=False).drop_duplicates(["nombre", "anio"]).sort_values(["nombre", "anio"])
+d = d.sort_values("emitidos", ascending=False).drop_duplicates(["nombre", "anio"]).sort_values(["nombre", "anio"])
+pocos = d[d.emitidos < MIN_VOTOS]
+print(f"se descartan {len(pocos)} diputado-período con menos de {MIN_VOTOS} votos emitidos")
+d = d[d.emitidos >= MIN_VOTOS].copy()
+d["lado"] = (d.idp_lo > 0).astype(int) - (d.idp_hi < 0).astype(int)     # 1 lado LLA, -1 opositor, 0 sin lado claro
 fotos = pd.read_csv(AQUI / "fotos.csv")
 fotos = dict(zip(fotos.nombre.replace(ALIAS).map(clave), "fotos/" + fotos.foto))
 faltan = d[d.provincia.isna() | ~d.provincia.isin(PROV)]
@@ -70,8 +78,13 @@ fideos, combo, matriz = [], [], []
 for n in nombres:
     g = d[d.nombre == n].sort_values("anio")
     ultimo = g.iloc[-1]
-    of = g.oficialista
-    postura = "oficialista" if of.all() else "opositora" if not of.any() else "variable"
+    lados = set(g.lado) - {0}
+    if lados == {1, -1}:
+        postura = "variable"
+    elif lados:
+        postura = "oficialista" if lados == {1} else "opositora"
+    else:
+        postura = "oficialista" if g.idp.mean() > 0 else "opositora"
     cod, region = PROV[ultimo.provincia]
     foto = fotos.get(clave(n), SILUETA)
     fideos.append({"nombre": lindo(n), "foto": foto, "distrito": str(cod),
@@ -90,4 +103,5 @@ for n in nombres:
 
 print(f"{len(fideos)} diputados, {len(matriz)} filas diputado-año, {sum(f['foto'] != SILUETA for f in fideos)} con foto")
 print(pd.Series([f["col"] for f in fideos]).map({v: k for k, v in COLOR.items()}).value_counts().to_string())
-print(d.groupby("anio").agg(diputados=("nombre", "size"), lado_LLA=("oficialista", "sum")).to_string())
+print(d.groupby("anio").agg(diputados=("nombre", "size"), lado_LLA=("lado", lambda x: (x == 1).sum()),
+                            opositor=("lado", lambda x: (x == -1).sum()), sin_lado_claro=("lado", lambda x: (x == 0).sum())).to_string())

@@ -40,9 +40,13 @@ estimar <- function(p) {
   set.seed(1)
   # como en la clase 2: impute = F y 100.000 vueltas (con menos, dos semillas no dan lo mismo)
   fit <- ideal(rc, normalize = TRUE, impute = FALSE, maxiter = 100000, burnin = 50000)
-  out <- data.table(nombre = rownames(fit$xbar), idp = as.numeric(fit$xbar[, 1]), anio = p)
+  # intervalo del 95% de cada punto ideal, a partir de las muestras de la cadena (fit$x: muestra x diputado x dim)
+  muestras <- fit$x[, , 1, drop = TRUE]
+  out <- data.table(nombre = rownames(fit$xbar), idp = as.numeric(fit$xbar[, 1]), anio = p,
+                    idp_lo = apply(muestras, 2, quantile, 0.025), idp_hi = apply(muestras, 2, quantile, 0.975))
   d <- mean(out[nombre %in% derecha, idp]); i <- mean(out[nombre %in% izquierda, idp])
-  if ((!is.nan(d) && d < 0) || (is.nan(d) && !is.nan(i) && i > 0)) out[, idp := -idp]
+  if ((!is.nan(d) && d < 0) || (is.nan(d) && !is.nan(i) && i > 0))
+    out[, `:=`(idp = -idp, idp_lo = -idp_hi, idp_hi = -idp_lo)]
   cat(sprintf("%d: %d diputados, %d votaciones · derecha %+.2f, izquierda %+.2f\n", p, length(legis), length(actas),
               mean(out[nombre %in% derecha, idp]), mean(out[nombre %in% izquierda, idp])))
   out
@@ -50,6 +54,8 @@ estimar <- function(p) {
 
 idps <- rbindlist(lapply(sort(unique(sesiones$periodo)), estimar))
 fwrite(idps, "idps.csv")
-fwrite(sesiones[, .(bloque = last(bloque), provincia = last(provincia), votos = .N), .(legislador, periodo)],
+# votos = votaciones en las que figura; emitidos = las que votó (afirmativo, negativo o abstención)
+fwrite(sesiones[, .(bloque = last(bloque), provincia = last(provincia), votos = .N,
+                    emitidos = sum(voto %in% c("AFIRMATIVO", "NEGATIVO", "ABSTENCION"))), .(legislador, periodo)],
        "legisladores.csv")
 cat("listo: idps.csv y legisladores.csv\n")
