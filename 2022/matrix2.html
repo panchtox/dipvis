@@ -180,18 +180,29 @@
 			row.append("line")
 				.attr("x2", wmx);
 
+			// fondo de cada etiqueta: invisible hasta que el cursor pasa por el nombre
+			row.append("rect").attr("class", "etiqueta-fondo");
 			row.append("text")
+				.attr("class", "etiqueta")
 				.attr("x", -6)
 				.attr("y", x.rangeBand() / 2)
 				.attr("dy", ".32em")
 				.attr("text-anchor", "end")
 				.attr("id",function(d,i){return ("matrix"+d[i].y)})//nodes[i].id
 				.text(function(d, i) { return nodes[i].nombre; })
-				.on("mouseover",function() {reversarIDmatrix(d3.select(this).attr("id"));
-							d3.select(this).attr("fill","blue")})
+				.on("mouseover",function() {
+							reversarIDmatrix(d3.select(this).attr("id"));
+							d3.select(this.parentNode).classed("etiqueta-activa", true)})
 				.on("mouseout",function() {
-							d3.select(this).attr("fill","black")})
+							d3.select(this.parentNode).classed("etiqueta-activa", false)})
 				;
+			// el fondo toma el tamaño del nombre, con un poco de aire
+			row.each(function() {
+				var caja = d3.select(this).select("text.etiqueta").node().getBBox();
+				d3.select(this).select("rect.etiqueta-fondo")
+					.attr("x", caja.x - 5).attr("y", caja.y - 1.5)
+					.attr("width", caja.width + 10).attr("height", caja.height + 3).attr("rx", 3);
+			});
 
 			var column = svg2.selectAll(".column")
 				.data(matrix)
