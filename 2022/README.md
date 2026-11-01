@@ -19,3 +19,5 @@ python 02_armar_json.py                                                         
 ```
 
 **Barras de la tarjeta.** Una barra por año: arriba y en violeta si ese año quedó claramente del lado de LLA, abajo y en verde azulado si quedó del lado opositor, y una raya gris chica si el intervalo tocó el cero. Es la misma regla que define el color de la línea.
+
+**Diapositivas.** El home de 2022 tiene `diapositivas: true` en `window.DIPVIS`. El texto ocupa la primera pantalla y el gráfico entra entero en la segunda: su alto se ajusta a la ventana. Desde el texto, la rueda, las flechas, AvPág, la barra espaciadora o el botón «Ver el gráfico» llevan al gráfico, y desde el tope del gráfico, hacia arriba, se vuelve al texto. El salto lo hace `theme-init.js` (`armarDiapositivas`). Las páginas sin esa opción, como 2006–2011, no cambian.

@@ -341,6 +341,32 @@ ul.menu ul li a:hover { background: var(--panel-2); color: var(--ink); }
   text-wrap: pretty;
 }
 
+/* Home en diapositivas (sólo si la página pide window.DIPVIS.diapositivas; el salto lo hace theme-init.js).
+   El texto ocupa la primera pantalla y el gráfico entra entero en la segunda. */
+html.diapos .viz-head {
+  min-height: calc(100vh - 60px - 2 * clamp(20px, 3vw, 38px));   /* 60px = menú fijo */
+  margin-bottom: clamp(20px, 3vw, 38px);
+  display: flex; flex-direction: column; justify-content: center;
+}
+.viz-salto {
+  align-self: flex-start;
+  margin-top: 26px;
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 10px 18px;
+  font: 600 13px var(--font-mono);
+  letter-spacing: .08em; text-transform: uppercase;
+  color: var(--bg);
+  background: var(--accent);
+  border: 0; border-radius: 999px;
+  cursor: pointer;
+  transition: transform .15s ease, filter .15s ease;
+}
+.viz-salto:hover { filter: brightness(1.08); transform: translateY(1px); }
+.viz-salto:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+.viz-salto span { display: inline-block; animation: salto-flecha 1.8s ease-in-out infinite; }
+@keyframes salto-flecha { 0%, 100% { transform: translateY(-1px); } 50% { transform: translateY(3px); } }
+@media (prefers-reduced-motion: reduce) { .viz-salto span { animation: none; } }
+
 /* el <table> que arma el layout de la home */
 body table { margin: 0; border-collapse: separate; }
 

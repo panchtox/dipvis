@@ -6,6 +6,7 @@
 		<script>
 		window.DIPVIS = {
 			base: "../",
+			diapositivas: true,   // el scroll encaja en el texto, el gráfico y el pie
 			periodo: "2022&ndash;2026",
 			anios: [2022, 2026],
 			lede: "Cada hilo es la trayectoria de un diputado al votar en la C&aacute;mara entre 2022 y 2026. " +
@@ -35,6 +36,9 @@
 		var viewportWidth  = document.documentElement.clientWidth
 			,viewportHeight = document.documentElement.clientHeight;//Toman ancho y alto de pantalla
 		var h=viewportHeight*0.80, w=viewportWidth*0.65, margin1=30,pomo,cuadro=w/4,duration=1500,delay=1000;
+		// en modo diapositivas el gráfico tiene que entrar entero en una pantalla:
+		// alto de la ventana menos el menú (60), el buscador y los títulos de los paneles (~150)
+		if (window.DIPVIS && window.DIPVIS.diapositivas) h = Math.max(420, viewportHeight - 215);
 		var color10=d3.scale.category10();//Paleta categorica de 10 colores
 /*
 *COMBO BOX

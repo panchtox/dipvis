@@ -155,6 +155,7 @@
         '<p class="viz-lede">' + LEDE + '</p>');
       shell.appendChild(head);
       shell.appendChild(table);
+      if (CFG.diapositivas) armarDiapositivas(head, table);
     }
 
     // etiqueta del combo
@@ -189,6 +190,44 @@
         '<span class="pc-hint">clic &rarr; mapa de calor</span>';
       mapa.insertBefore(capm, mapa.firstChild);
     }
+  }
+
+  // ---- DIAPOSITIVAS (opcional, window.DIPVIS.diapositivas) ----
+  // Dos paradas, como diapositivas: el texto y el gráfico entero.
+  // Desde el texto, cualquier movimiento hacia abajo (rueda, flechas, AvPág, espacio, el botón)
+  // lleva al gráfico; desde el tope del gráfico, hacia arriba vuelve al texto. Más abajo el scroll es normal.
+  function armarDiapositivas(head, table) {
+    document.documentElement.classList.add("diapos");
+    table.classList.add("diapo-grafico");
+    var MENU = 60, yendo = false;
+    function topeGrafico() { return Math.round(table.getBoundingClientRect().top + window.pageYOffset - MENU - 10); }
+    function ir(y) {
+      yendo = true;
+      window.scrollTo({ top: y, behavior: "smooth" });
+      setTimeout(function () { yendo = false; }, 700);
+    }
+    function paso(dir) {            // devuelve true si hizo el salto
+      var y = window.pageYOffset, g = topeGrafico();
+      if (dir > 0 && y < g - 4) { ir(g); return true; }
+      if (dir < 0 && y <= g + 4 && y > 0) { ir(0); return true; }
+      return false;
+    }
+    window.addEventListener("wheel", function (e) {
+      if (e.ctrlKey || Math.abs(e.deltaY) < Math.abs(e.deltaX)) return;
+      if (yendo) { e.preventDefault(); return; }
+      if (paso(e.deltaY > 0 ? 1 : -1)) e.preventDefault();
+    }, { passive: false });
+    window.addEventListener("keydown", function (e) {
+      var t = e.target && e.target.tagName;
+      if (t === "INPUT" || t === "TEXTAREA" || t === "SELECT") return;
+      var abajo = { ArrowDown: 1, PageDown: 1, " ": 1 }, arriba = { ArrowUp: 1, PageUp: 1 };
+      var dir = abajo[e.key] && !e.shiftKey ? 1 : (arriba[e.key] || (e.key === " " && e.shiftKey)) ? -1 : 0;
+      if (dir && (yendo || paso(dir))) e.preventDefault();
+    });
+    var salto = el("button", "viz-salto", 'Ver el gr&aacute;fico <span aria-hidden="true">&darr;</span>');
+    salto.type = "button";
+    salto.addEventListener("click", function () { ir(topeGrafico()); });
+    head.appendChild(salto);
   }
 
   // ---- MATRIX ----
