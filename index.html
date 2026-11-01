@@ -296,10 +296,9 @@
 		<script type="text/javascript">
 		$(document).ready(function(){//Lleva el tooltip a la posicion cercana al mouse
 			$('#posturas').mousemove(function(e){
-				if (e.pageY<h-margin1+10 && e.pageX<w-margin1+10) {
-					$("#tooltip").css({top: e.pageY, left: e.pageX+30, position:'absolute'});
-				} else{
-				};
+				// la tarjeta sigue al cursor en todo el gráfico (antes sólo si pageY < 80% del alto de la ventana,
+				// y con el encabezado arriba eso dejaba la tarjeta fuera de la vista)
+				$("#tooltip").css({top: e.pageY, left: e.pageX+30, position:'absolute'});
 				
 			});
 		});
