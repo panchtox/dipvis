@@ -100,7 +100,7 @@
 	provName = provName.replace(/%20/g,' ');	
 	console.log(prov);
 	var vwWidth=document.documentElement.clientWidth;
-	var margin = {top: 150, right: 0, bottom: 10, left: 150}, wmx = vwWidth*0.40, hmx = wmx;
+	var margin = {top: 150, right: 0, bottom: 36, left: 150}, wmx = vwWidth*0.40, hmx = wmx;
 	var x = d3.scale.ordinal().rangeBands([0, wmx]), z = d3.scale.linear().domain([4, 0]).clamp(true), c = d3.scale.ordinal().domain(["La Libertad Avanza"]).range(["#6a3fa0","#bd7a36","#5d7d39","#2f5d86","#3f9d92","#c2553f","#7d6a4f","#4a7bb5","#9c8a3d","#b0608a"]);
 	var data, matrix, ord;
 	var nodes=[], bloques=[], regiones=[];
@@ -209,6 +209,20 @@
 				.attr("text-anchor", "start")
 				.text(function(d, i) { return nodes[i].nombre; });
 
+			// Cruz del cero: con el orden por punto ideal (de mayor a menor), los positivos quedan primero
+			// y el cero cae entre el último positivo y el primer negativo. Con otro orden se oculta.
+			var positivos = nodes.filter(function(d) { return d.idp > 0; }).length;
+			var pos0 = positivos * x.rangeBand();
+			var cero = svg2.append("g").attr("class", "cero")
+				.style("opacity", selOrder == "idp" ? 1 : 0).style("pointer-events", "none");
+			["cero-halo", "cero-linea"].forEach(function(clase) {
+				cero.append("line").attr("class", clase).attr("x1", pos0).attr("x2", pos0).attr("y1", -6).attr("y2", hmx + 6);
+				cero.append("line").attr("class", clase).attr("y1", pos0).attr("y2", pos0).attr("x1", -6).attr("x2", wmx + 6);
+			});
+			cero.append("text").attr("class", "cero-texto").attr("x", pos0).attr("y", hmx + 22).attr("text-anchor", "middle").text("0");
+			cero.append("text").attr("class", "cero-texto").attr("x", pos0 - 10).attr("y", hmx + 22).attr("text-anchor", "end").text("← lado LLA");
+			cero.append("text").attr("class", "cero-texto").attr("x", pos0 + 10).attr("y", hmx + 22).attr("text-anchor", "start").text("lado opositor →");
+
 			$('.bloque-row').remove();
 			for(b in bloques){
 				var rowb = d3.select("#refBloque").append("div").attr("class","bloque-row");
@@ -253,6 +267,9 @@
 			function order(value) {
 					x.domain(orders[value]);
 					var t = svg2.transition().duration(2500);
+					// la cruz del cero aparece al final del reordenamiento, y sólo con el orden por punto ideal
+					cero.transition().duration(value == "idp" ? 600 : 300).delay(value == "idp" ? 2500 : 0)
+						.style("opacity", value == "idp" ? 1 : 0);
 
 					t.selectAll(".row")
 					.delay(function(d, i) { return x(i) * 4; })

@@ -31,3 +31,18 @@
 [data-theme="ink"] .posturadip.opositora,
 [data-theme="ink"] .posturadip.opositora.enabled   { stroke: #4f9499; }
 /* el resaltado al pasar el cursor y lo atenuado siguen saliendo de theme.css: esas reglas tienen una clase más */
+
+/* Mapa de calor: cruz del cero (sólo con el orden por punto ideal).
+   Halo del color del fondo debajo de una línea punteada, para que se vea sobre las celdas oscuras. */
+.cero .cero-halo  { stroke-width: 7; }
+.cero .cero-linea { stroke-width: 3; stroke-dasharray: 9 5; }
+.cero .cero-texto { font: 600 11px "IBM Plex Mono", ui-monospace, monospace; }
+[data-theme="editorial"] .cero .cero-halo  { stroke: #fbf9f3; }
+[data-theme="editorial"] .cero .cero-linea { stroke: #9c3b2e; }
+[data-theme="editorial"] .cero .cero-texto { fill: #9c3b2e; }
+[data-theme="minimal"]   .cero .cero-halo  { stroke: #ffffff; }
+[data-theme="minimal"]   .cero .cero-linea { stroke: #1f44d6; }
+[data-theme="minimal"]   .cero .cero-texto { fill: #1f44d6; }
+[data-theme="ink"]       .cero .cero-halo  { stroke: #0f1218; }
+[data-theme="ink"]       .cero .cero-linea { stroke: #ff8a6b; }
+[data-theme="ink"]       .cero .cero-texto { fill: #ff8a6b; }
