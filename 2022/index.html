@@ -35,7 +35,12 @@
 		var dips,ar=Array(),idps=Array();
 		var viewportWidth  = document.documentElement.clientWidth
 			,viewportHeight = document.documentElement.clientHeight;//Toman ancho y alto de pantalla
-		var h=viewportHeight*0.80, w=viewportWidth*0.65, margin1=30,pomo,cuadro=w/4,duration=1500,delay=1000;
+		// ancho útil = la ventana menos los márgenes laterales de la página (los de .viz-shell en theme.css)
+		// y ~44px entre bordes de los paneles, la separación de la tabla y el margen del mapa;
+		// el gráfico se lleva el 70 % y el mapa el 30 %, así nada se sale por la derecha
+		var anchoUtil = viewportWidth - 2 * Math.min(40, Math.max(14, viewportWidth * 0.04)) - 44;
+		var anchoMapa = anchoUtil * 0.30;
+		var h=viewportHeight*0.80, w=anchoUtil*0.70, margin1=30,pomo,cuadro=w/4,duration=1500,delay=1000;
 		// en modo diapositivas el gráfico tiene que entrar entero en una pantalla:
 		// alto de la ventana menos el menú (60), el buscador y los títulos de los paneles (~150)
 		if (window.DIPVIS && window.DIPVIS.diapositivas) h = Math.max(420, viewportHeight - 215);
@@ -336,9 +341,9 @@
 		/*
 		*La parte del mapa
 		*/
-			var mapw=viewportWidth*0.3,maph=h;
+			var mapw=anchoMapa,maph=h;
 			var mapsvg=d3.select("#mapa")//agregamos un svg para contener el mapa
-					.style("width",viewportWidth*0.30+"px")
+					.style("width",anchoMapa+"px")
 					.style("height",h+"px")
 					.style("margin-left","20px")
 		 			.append("svg")

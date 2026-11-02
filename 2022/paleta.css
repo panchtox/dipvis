@@ -57,3 +57,7 @@
 [data-theme="editorial"] .row.etiqueta-activa text.etiqueta,
 [data-theme="minimal"]   .row.etiqueta-activa text.etiqueta { fill: #ffffff; font-weight: 600; }
 [data-theme="ink"]       .row.etiqueta-activa text.etiqueta { fill: #0f1218; font-weight: 600; }
+
+/* La página usa todo el ancho de la ventana (el gráfico y el mapa calculan su ancho a partir de ella),
+   en vez de la columna centrada de 1380px: así no queda espacio vacío a la izquierda ni scroll horizontal. */
+.viz-shell { max-width: none; }

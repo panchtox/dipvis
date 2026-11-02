@@ -212,14 +212,16 @@
       if (dir < 0 && y <= g + 4 && y > 0) { ir(0); return true; }
       return false;
     }
+    // lo que tiene scroll propio (la lista de resultados del buscador) se queda con la rueda
+    function adentroDelBuscador(t) { return t && t.closest && t.closest(".chzn-container"); }
     window.addEventListener("wheel", function (e) {
-      if (e.ctrlKey || Math.abs(e.deltaY) < Math.abs(e.deltaX)) return;
+      if (e.ctrlKey || Math.abs(e.deltaY) < Math.abs(e.deltaX) || adentroDelBuscador(e.target)) return;
       if (yendo) { e.preventDefault(); return; }
       if (paso(e.deltaY > 0 ? 1 : -1)) e.preventDefault();
     }, { passive: false });
     window.addEventListener("keydown", function (e) {
       var t = e.target && e.target.tagName;
-      if (t === "INPUT" || t === "TEXTAREA" || t === "SELECT") return;
+      if (t === "INPUT" || t === "TEXTAREA" || t === "SELECT" || adentroDelBuscador(e.target)) return;
       var abajo = { ArrowDown: 1, PageDown: 1, " ": 1 }, arriba = { ArrowUp: 1, PageUp: 1 };
       var dir = abajo[e.key] && !e.shiftKey ? 1 : (arriba[e.key] || (e.key === " " && e.shiftKey)) ? -1 : 0;
       if (dir && (yendo || paso(dir))) e.preventDefault();
