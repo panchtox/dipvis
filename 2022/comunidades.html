@@ -10,7 +10,7 @@ window.DIPVIS = {
 	base: "../",
 	seccion: "comunidades",
 	periodo: "2022&ndash;2026",
-	datos: "Comunidades 2026 &middot; votaciones nominales de la HCDN del 10/12/2025 al 9/9/2026"
+	datos: "Comunidades 2025 y 2026 &middot; votaciones nominales de la HCDN hasta el 9/9/2026"
 };
 </script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -26,16 +26,18 @@ window.DIPVIS = {
 <ul class="menu"></ul>
 <main class="ex">
 	<header class="ex-head">
-		<p class="viz-kicker">2026 &middot; Comunidades</p>
-		<h1 class="viz-title">Las comunidades de 2026, una por una</h1>
-		<p class="viz-lede">Dos diputados quedan unidos si votaron parecido en 2026; un algoritmo de detecci&oacute;n de comunidades busca los grupos
+		<div class="anios" role="group" aria-label="Elegir el a&ntilde;o">
+			<button type="button" data-anio="2026">2026</button><button type="button" data-anio="2025">2025</button>
+		</div>
+		<p class="viz-kicker" id="kicker">2026 &middot; Comunidades</p>
+		<h1 class="viz-title" id="titulo">Las comunidades de 2026, una por una</h1>
+		<p class="viz-lede">Dos diputados quedan unidos si votaron parecido en el a&ntilde;o; un algoritmo de detecci&oacute;n de comunidades busca los grupos
 			que est&aacute;n m&aacute;s unidos entre s&iacute; que con el resto. Las comunidades van numeradas de izquierda a derecha del eje.
 			Pas&aacute; el cursor por una tarjeta (o tocala) para ver qu&eacute; la separa de la vecina.</p>
-		<p class="ex-nota">El algoritmo encontr&oacute; diez. Las tres de La Libertad Avanza (C8, C9 y C10) no tienen ni una votaci&oacute;n
-			en la que voten distinto: la divisi&oacute;n era ruido de la estimaci&oacute;n, as&iacute; que ac&aacute; van como una sola.</p>
+		<p class="ex-nota" id="nota"></p>
 	</header>
 
-	<section class="eje-marco" aria-label="Los diputados de 2026 sobre el eje">
+	<section class="eje-marco" aria-label="Los diputados sobre el eje">
 		<div id="eje"></div>
 		<div class="ley" id="ley"></div>
 	</section>
@@ -56,36 +58,60 @@ window.DIPVIS = {
 <script>
 (function(){
 	var $ = function(s){ return document.querySelector(s); };
-	var D, COMS, eje, elegida = null, busca = '', marcado = null;
+	var anio = null, D, COMS, eje, elegida = null, busca = '', marcado = null;
+	var cache = {};
+	var ARCHIVO = { 2026: 'data/comunidades.json', 2025: 'data/comunidades_2025.json' };
+	var NOTA = {
+		2026: 'El algoritmo encontr&oacute; diez. Las tres de La Libertad Avanza (C8, C9 y C10) no tienen ni una votaci&oacute;n ' +
+			'en la que voten distinto: la divisi&oacute;n era ruido de la estimaci&oacute;n, as&iacute; que ac&aacute; van como una sola.',
+		2025: 'El algoritmo encontr&oacute; trece. Las vecinas sin ninguna votaci&oacute;n en la que voten distinto van juntas: ' +
+			'el peronismo, que aparec&iacute;a partido en cinco, queda en una sola. Quedan grupos chicos que separan una votaci&oacute;n o las ausencias. ' +
+			'2025 llega hasta el 9/12/2025, antes de que asumiera la C&aacute;mara nueva; no entran los diputados que votaron menos de 20 veces.'
+	};
 
-	fetch('data/comunidades.json').then(function(r){ return r.json(); }).then(function(json){
-		D = json.diputados; COMS = json.comunidades;
-		DV.leyenda($('#ley'));
-		eje = DV.eje($('#eje'), D, {
-			coms: COMS,
-			alHover: function(d){ foco(d ? d.c : null, d ? d.id : null); },
-			alTramo: function(c){ foco(c); },
-			alClick: function(d){ elegir(d.c, d.id); },
-			alClickTramo: function(c){ elegir(c); }
+	// ---- cargar un año ----
+	function cargar(a){
+		a = +a;
+		if (a === anio) return Promise.resolve();
+		var p = cache[a] ? Promise.resolve(cache[a]) : fetch(ARCHIVO[a]).then(function(r){ return r.json(); });
+		return p.then(function(json){
+			cache[a] = json; anio = a; D = json.diputados; COMS = json.comunidades;
+			elegida = null; marcado = null; busca = ''; $('#q').value = '';
+			$('#kicker').innerHTML = a + ' &middot; Comunidades';
+			$('#titulo').textContent = 'Las comunidades de ' + a + ', una por una';
+			$('#nota').innerHTML = NOTA[a];
+			document.title = 'Comunidades ' + a + ' · DipVis';
+			[].forEach.call(document.querySelectorAll('.anios button'), function(b){
+				b.classList.toggle('on', +b.dataset.anio === a);
+				b.setAttribute('aria-pressed', +b.dataset.anio === a);
+			});
+			$('#eje').innerHTML = '';
+			eje = DV.eje($('#eje'), D, {
+				coms: COMS,
+				alHover: function(d){ foco(d ? d.c : null, d ? d.id : null); },
+				alTramo: function(c){ foco(c); },
+				alClick: function(d){ elegir(d.c, d.id); },
+				alClickTramo: function(c){ elegir(c); }
+			});
+			tarjetas();
+			$('#chips').innerHTML = '<button class="chip" data-c="">Todas</button>' +
+				COMS.map(function(c){ return '<button class="chip" data-c="' + c.c + '">C' + c.c + '</button>'; }).join('');
+			lista();
 		});
-		tarjetas();
-		chips();
-		desdeHash();
-		window.addEventListener('hashchange', desdeHash);
-	});
+	}
 
 	function foco(c, id){
-		eje.foco(c != null ? c : elegida, id != null ? id : marcado);
+		if (eje) eje.foco(c != null ? c : elegida, id != null ? id : marcado);
 	}
 
 	function ids(c){ return D.filter(function(d){ return d.c === c; }).map(function(d){ return d.id; }); }
-	function linkTrayectorias(c){ return 'index.html#dips=' + ids(c).join(',') + '&t=' + encodeURIComponent('la comunidad C' + c); }
+	function linkTrayectorias(c){ return 'index.html#dips=' + ids(c).join(',') + '&t=' + encodeURIComponent('la comunidad C' + c + ' de ' + anio); }
 
 	function tarjetas(){
 		$('#grilla').innerHTML = COMS.map(function(c){
 			var m = D.filter(function(d){ return d.c === c.c; });
 			var pts = m.map(function(d){ return '<i style="background:' + DV.COLOR[d.f] + '"></i>'; }).join('');
-			var antes = c.antes.length > 1 ? '<span class="antes">antes C' + c.antes.join(', C').replace(/, C(\d+)$/, ' y C$1') + '</span>' : '';
+			var antes = c.antes_txt ? '<span class="antes">' + c.antes_txt + '</span>' : '';
 			return '<article class="t" tabindex="0" data-c="' + c.c + '" aria-label="Comunidad C' + c.c + ', ' + c.n + ' diputados">' +
 				'<div class="g">' +
 				'<div class="cara frente">' +
@@ -104,35 +130,41 @@ window.DIPVIS = {
 					'<a href="' + linkTrayectorias(c.c) + '">Sus trayectorias &rarr;</a></div>' +
 				'</div></div></article>';
 		}).join('');
-
-		var tocable = window.matchMedia('(hover: none)').matches;
-		[].forEach.call(document.querySelectorAll('.t'), function(t){
-			var c = +t.dataset.c;
-			t.addEventListener('mouseenter', function(){ foco(c); });
-			t.addEventListener('mouseleave', function(){ foco(null); });
-			t.addEventListener('click', function(e){
-				if (e.target.closest('a,button')) return;
-				if (tocable) t.classList.toggle('on'); else elegir(c);
-			});
-			t.addEventListener('keydown', function(e){
-				if (e.target !== t) return;
-				if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); t.classList.toggle('on'); }
-			});
-		});
-		$('#grilla').addEventListener('click', function(e){
-			var b = e.target.closest('[data-ver]');
-			if (b) { elegir(+b.dataset.ver); $('#quienes').scrollIntoView({ behavior: 'smooth' }); }
-		});
 	}
 
-	function chips(){
-		$('#chips').innerHTML = '<button class="chip" data-c="">Todas</button>' +
-			COMS.map(function(c){ return '<button class="chip" data-c="' + c.c + '">C' + c.c + '</button>'; }).join('');
-		$('#chips').addEventListener('click', function(e){
-			var b = e.target.closest('.chip'); if (!b) return;
-			elegir(b.dataset.c ? +b.dataset.c : null);
-		});
-		$('#q').addEventListener('input', function(e){ busca = DV.plano(e.target.value.trim()); lista(); });
+	// los manejadores van una sola vez, sobre los contenedores (las tarjetas se rehacen al cambiar de año)
+	var tocable = window.matchMedia('(hover: none)').matches;
+	var grilla = $('#grilla');
+	grilla.addEventListener('mouseover', function(e){ var t = e.target.closest('.t'); if (t && !t.contains(e.relatedTarget)) foco(+t.dataset.c); });
+	grilla.addEventListener('mouseout', function(e){ var t = e.target.closest('.t'); if (t && !t.contains(e.relatedTarget)) foco(null); });
+	grilla.addEventListener('click', function(e){
+		var b = e.target.closest('[data-ver]');
+		if (b) { elegir(+b.dataset.ver); $('#quienes').scrollIntoView({ behavior: 'smooth' }); return; }
+		if (e.target.closest('a,button')) return;
+		var t = e.target.closest('.t'); if (!t) return;
+		if (tocable) t.classList.toggle('on'); else elegir(+t.dataset.c);
+	});
+	grilla.addEventListener('keydown', function(e){
+		var t = e.target;
+		if (!t.classList || !t.classList.contains('t')) return;
+		if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); t.classList.toggle('on'); }
+	});
+	$('#chips').addEventListener('click', function(e){
+		var b = e.target.closest('.chip'); if (!b) return;
+		elegir(b.dataset.c ? +b.dataset.c : null);
+	});
+	$('#q').addEventListener('input', function(e){ busca = DV.plano(e.target.value.trim()); lista(); });
+	document.querySelector('.anios').addEventListener('click', function(e){
+		var b = e.target.closest('button[data-anio]'); if (!b) return;
+		cargar(b.dataset.anio).then(function(){ escribirHash(); });
+	});
+
+	function escribirHash(){
+		var h = [];
+		if (anio !== 2026) h.push('a=' + anio);
+		if (marcado) h.push('dip=' + marcado); else if (elegida != null) h.push('c=' + elegida);
+		h = h.length ? '#' + h.join('&') : '';
+		if (location.hash !== h) history.replaceState(null, '', location.pathname + h);
 	}
 
 	function elegir(c, id){
@@ -141,8 +173,7 @@ window.DIPVIS = {
 		[].forEach.call(document.querySelectorAll('.t'), function(t){ t.classList.toggle('elegida', +t.dataset.c === c); });
 		foco(null);
 		lista();
-		var h = c == null ? '' : (id ? '#dip=' + id : '#c=' + c);
-		if (location.hash !== h) history.replaceState(null, '', location.pathname + h);
+		escribirHash();
 	}
 
 	function lista(){
@@ -151,10 +182,10 @@ window.DIPVIS = {
 		else if (elegida != null) m = D.filter(function(d){ return d.c === elegida; });
 		else m = [];   // sin elegir nada, la lista queda vacía: 258 tarjetas de golpe son demasiadas
 		var com = COMS.filter(function(c){ return c.c === elegida; })[0];
-		$('#q-titulo').textContent = busca ? 'Resultados' : com ? 'Comunidad C' + com.c + ' · ' + com.n + ' diputados' : 'Quién es quién';
+		$('#q-titulo').textContent = busca ? 'Resultados' : com ? 'Comunidad C' + com.c + ' de ' + anio + ' · ' + com.n + ' diputados' : 'Quién es quién';
 		$('#q-sub').innerHTML = busca ? m.length + (m.length === 1 ? ' diputado' : ' diputados') :
 			com ? com.comp + '. De izquierda a derecha del eje; cada nombre lleva a su trayectoria. <a href="' + linkTrayectorias(com.c) + '">Ver las ' + com.n + ' trayectorias juntas &rarr;</a>' :
-			'Eleg&iacute; una comunidad o busc&aacute; un apellido entre los ' + D.length + ' diputados de 2026. Cada nombre lleva a su trayectoria 2022&ndash;2026.';
+			'Eleg&iacute; una comunidad o busc&aacute; un apellido entre los ' + D.length + ' diputados de ' + anio + '. Cada nombre lleva a su trayectoria 2022&ndash;2026.';
 		[].forEach.call(document.querySelectorAll('.chip'), function(b){
 			b.classList.toggle('on', !busca && (b.dataset.c ? +b.dataset.c === elegida : elegida == null));
 		});
@@ -164,23 +195,27 @@ window.DIPVIS = {
 				'<span class="q-txt"><span class="q-n"><i style="background:' + DV.COLOR[d.f] + '"></i>' + DV.persona(d.n) + '</span>' +
 				'<span class="q-b">' + d.b + ' &middot; ' + d.p + '</span>' +
 				'<span class="q-x">C' + d.c + ' &middot; punto ideal ' + DV.num(d.x) + '</span></span></a>';
-		}).join('') : busca ? '<p class="vacio">No hay diputados de 2026 con ese nombre.</p>' : '';
+		}).join('') : busca ? '<p class="vacio">No hay diputados de ' + anio + ' con ese nombre.</p>' : '';
 	}
 	$('#gente').addEventListener('mouseover', function(e){
 		var a = e.target.closest('a[data-id]'); if (a) { var d = D.filter(function(x){ return x.id === +a.dataset.id; })[0]; foco(d.c, d.id); }
 	});
 	$('#gente').addEventListener('mouseleave', function(){ foco(null); });
 
-	// comunidades.html#c=3 o #dip=123
+	// comunidades.html#c=3, #dip=123 y, para 2025, #a=2025&c=3
 	function desdeHash(){
-		var c = location.hash.match(/c=(\d+)/), d = location.hash.match(/dip=(\d+)/);
-		if (d) {
-			var x = D.filter(function(y){ return y.id === +d[1]; })[0];
-			if (x) { elegir(x.c, x.id); setTimeout(function(){ var a = document.querySelector('.gente a.marcado'); if (a) a.scrollIntoView({ block: 'center', behavior: 'smooth' }); }, 60); return; }
-		}
-		if (c) { elegir(+c[1]); return; }
-		lista();
+		var a = location.hash.match(/a=(\d{4})/), c = location.hash.match(/[#&]c=(\d+)/), d = location.hash.match(/dip=(\d+)/);
+		cargar(a && ARCHIVO[a[1]] ? a[1] : 2026).then(function(){
+			if (d) {
+				var x = D.filter(function(y){ return y.id === +d[1]; })[0];
+				if (x) { elegir(x.c, x.id); setTimeout(function(){ var el = document.querySelector('.gente a.marcado'); if (el) el.scrollIntoView({ block: 'center', behavior: 'smooth' }); }, 60); return; }
+			}
+			if (c) elegir(+c[1]);
+		});
 	}
+	DV.leyenda($('#ley'));
+	desdeHash();
+	window.addEventListener('hashchange', desdeHash);
 })();
 </script>
 </body>

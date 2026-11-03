@@ -59,7 +59,7 @@ window.DIPVIS = {
 		<a class="puerta" href="2022/comunidades.html">
 			<span class="p-num">02 &middot; Comunidades</span>
 			<h2>&iquest;Qui&eacute;n vota con qui&eacute;n?</h2>
-			<p>Los ocho grupos que vot&oacute; la C&aacute;mara en 2026, y la votaci&oacute;n que separa a cada uno de su vecino.</p>
+			<p>Los grupos que votan juntos en 2025 y en 2026, y la votaci&oacute;n que separa a cada uno de su vecino.</p>
 			<div class="p-dibujo" aria-hidden="true"><svg id="mini-com" viewBox="0 0 240 86"></svg></div>
 			<span class="p-ir">Ver las comunidades &rarr;</span>
 		</a>
@@ -120,11 +120,13 @@ window.DIPVIS = {
 
 	Promise.all([
 		fetch('2022/data/fideos_dips2.json').then(function(r){ return r.json(); }),
-		fetch('2022/data/comunidades.json').then(function(r){ return r.json(); })
+		fetch('2022/data/comunidades.json').then(function(r){ return r.json(); }),
+		fetch('2022/data/comunidades_2025.json').then(function(r){ return r.json(); })
 	]).then(function(res){
 		var TODOS = res[0].diputados, COM = res[1];
-		var en2026 = {};
+		var en2026 = {}, en2025 = {};
 		COM.diputados.forEach(function(d){ en2026[d.id] = d; });
+		res[2].diputados.forEach(function(d){ en2025[d.id] = d; });
 		DV.leyenda($('#ley'));
 		var eje = DV.eje($('#eje'), COM.diputados, {
 			alClick: function(d){ mostrar(TODOS.filter(function(x){ return x.id === d.id; })[0]); }
@@ -162,7 +164,7 @@ window.DIPVIS = {
 			if (!d) return;
 			cerrar();
 			q.value = DV.persona(d.nombre);
-			var c = en2026[d.id];
+			var c = en2026[d.id], c25 = en2025[d.id];
 			eje.foco(null, c ? d.id : null);
 			// trazo chico: su punto ideal año por año
 			var pts = d.points, W = 260, H = 56, x0 = 2022, x1 = 2026;
@@ -179,10 +181,12 @@ window.DIPVIS = {
 				'<img src="2022/' + d.foto + '" alt="">' +
 				'<div><div class="f-n">' + DV.persona(d.nombre) + '</div><div class="f-b">' + d.bloque + '<br>' + d.provincia + '</div></div>' +
 				'<div class="f-traza">' + traza + '</div>' +
-				'<p class="f-com">' + (c ? 'En 2026 est&aacute; en la comunidad <b>C' + c.c + '</b> (punto ideal ' + DV.num(c.x) + ').' : 'No est&aacute; entre los diputados de 2026.') + '</p>' +
+				'<p class="f-com">' + (c ? 'En 2026 est&aacute; en la comunidad <b>C' + c.c + '</b> (punto ideal ' + DV.num(c.x) + ')' : 'No est&aacute; entre los diputados de 2026') +
+					(c25 ? (c ? '; en 2025 estaba en la <b>C' + c25.c + '</b>.' : '. En 2025 estaba en la comunidad <b>C' + c25.c + '</b>.') : '.') + '</p>' +
 				'<div class="f-ir">' +
 					'<a href="2022/index.html#dips=' + d.id + '">Su trayectoria</a>' +
-					(c ? '<a href="2022/comunidades.html#dip=' + d.id + '">Su comunidad</a>' : '') +
+					(c ? '<a href="2022/comunidades.html#dip=' + d.id + '">Su comunidad 2026</a>' : '') +
+					(c25 ? '<a href="2022/comunidades.html#a=2025&dip=' + d.id + '">Su comunidad 2025</a>' : '') +
 					'<a href="2022/matrix2.html#' + d.distrito + '#' + d.provincia + '">Su provincia</a>' +
 				'</div></div>';
 		}

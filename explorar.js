@@ -61,7 +61,9 @@
       ultimoAncho = W;
       svg.innerHTML = "";
       var r = W < 560 ? 2.4 : W < 900 ? 3 : 3.6, paso = 2 * r + 1.2, pad = 14;
-      var lo = -2.75, hi = 1.45;
+      // el eje cubre siempre de -2,75 a 1,45 (así 2025 y 2026 se comparan) y se estira si un año se pasa
+      var xs = dips.map(function (d) { return d.x; });
+      var lo = Math.min(-2.75, Math.min.apply(null, xs) - 0.1), hi = Math.max(1.45, Math.max.apply(null, xs) + 0.1);
       var X = function (v) { return pad + (v - lo) / (hi - lo) * (W - 2 * pad); };
       // apilar: cada columna de ancho «paso» junta a los diputados que caen ahí
       var pilas = {}, alto = 0;
