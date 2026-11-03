@@ -239,12 +239,3 @@ ul.menu li.theme-switch { margin-left: auto; }
   ul.menu li:hover > ul.menu-prov { display: grid; grid-template-columns: 1fr; max-height: 60vh; overflow-y: auto; }
   .quienes-barra .buscar { margin-left: 0; width: 100%; }
 }
-
-/* selector de año en comunidades */
-.anios { display: inline-flex; gap: 2px; padding: 3px; margin: 0 0 18px; background: var(--panel); border: 1px solid var(--line); border-radius: 999px; }
-.anios button {
-  font: 600 14px var(--font-body); color: var(--ink-soft); background: none; border: 0;
-  border-radius: 999px; padding: 6px 16px; cursor: pointer;
-}
-.anios button:hover { color: var(--ink); }
-.anios button.on { background: var(--ink); color: var(--bg); }
