@@ -239,3 +239,46 @@ ul.menu li.theme-switch { margin-left: auto; }
   ul.menu li:hover > ul.menu-prov { display: grid; grid-template-columns: 1fr; max-height: 60vh; overflow-y: auto; }
   .quienes-barra .buscar { margin-left: 0; width: 100%; }
 }
+
+/* ---------- comunidades: los asuntos de 2026 en un espacio semántico ---------- */
+.sem { margin: 56px 0 0; scroll-margin-top: 80px; }
+.sem-marco { position: relative; }
+.sem-marco .ley { margin: 0 0 6px; }
+.sem-mapa svg, .sem-chicos svg { display: block; width: 100%; height: auto; overflow: visible; }
+.sem circle.a { cursor: pointer; transition: opacity .12s ease; }
+.sem.con-foco circle.a { opacity: .22; }
+.sem.con-foco circle.a.on { opacity: 1; stroke-width: 3; }
+.sem .rot-a { font: 500 15px var(--font-body); pointer-events: none; }
+.sem-tit { font: var(--display-weight) clamp(19px, 2.1vw, 24px)/1.2 var(--font-display); margin: 40px 0 6px; }
+.sem-esc { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; font-size: 13.5px; color: var(--ink-soft); margin: 0 0 14px; }
+.sem-esc i { width: 180px; height: 11px; border-radius: 6px; background: linear-gradient(90deg, #B5362A, #CFC9BA, #2A6FB0); }
+.sem-esc .sv { margin-left: 12px; }
+.sem-chicos { display: grid; gap: 14px; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); }
+.sem-chicos figure {
+  margin: 0; background: var(--panel); border: 1px solid var(--line); border-radius: calc(var(--radius) + 6px);
+  padding: 12px 14px 6px; box-shadow: var(--shadow);
+}
+.sem-chicos figcaption b { display: block; font: 600 16px var(--font-body); }
+.sem-chicos figcaption span { font-size: 13px; color: var(--ink-soft); }
+.sem-nota { margin: 18px 0 0; max-width: 78ch; font-size: 14px; color: var(--ink-soft); }
+.sem-tip {
+  position: absolute; width: 300px; pointer-events: none; z-index: 5;
+  background: var(--ink); color: var(--bg); border-radius: 6px; padding: 8px 12px;
+  font-size: 13px; line-height: 1.35;
+}
+.sem-tip b { display: block; font-weight: 600; margin-bottom: 2px; }
+.sem-tip span { display: block; opacity: .78; font-size: 12.5px; }
+/* bordes y rótulos con colores literales por tema (var() en atributos de SVG no se reevalúa al cambiar de tema) */
+[data-theme="editorial"] .sem circle.a { stroke: #fbf9f3; }
+[data-theme="minimal"]   .sem circle.a { stroke: #ffffff; }
+[data-theme="ink"]       .sem circle.a { stroke: #14161e; }
+[data-theme="editorial"] .sem circle.a.sv { stroke: #968d7c; }
+[data-theme="minimal"]   .sem circle.a.sv { stroke: #a2a2a9; }
+[data-theme="ink"]       .sem circle.a.sv { stroke: #5d6273; }
+[data-theme="editorial"] .sem circle.a.sv { fill: #fbf9f3; }
+[data-theme="minimal"]   .sem circle.a.sv { fill: #ffffff; }
+[data-theme="ink"]       .sem circle.a.sv { fill: #14161e; }
+[data-theme="editorial"] .sem .rot-a { fill: #1b1a16; }
+[data-theme="minimal"]   .sem .rot-a { fill: #141416; }
+[data-theme="ink"]       .sem .rot-a { fill: #e9ebf2; }
+@media (max-width: 760px) { .sem .rot-a { font-size: 22px; } .sem-tip { width: 240px; } }

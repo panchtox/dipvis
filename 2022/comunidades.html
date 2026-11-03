@@ -51,6 +51,26 @@ window.DIPVIS = {
 		</div>
 		<div class="gente" id="gente"></div>
 	</section>
+
+	<section class="sem" id="asuntos">
+		<h2 class="ex-sec">Qu&eacute; se vot&oacute;, seg&uacute;n de qu&eacute; trata</h2>
+		<p class="ex-sub">Cada punto es uno de los 40 &oacute;rdenes del d&iacute;a votados en 2026. Un modelo de lenguaje convierte el sumario
+			de cada uno en 384 n&uacute;meros y esos n&uacute;meros se proyectan a dos: cerca en el mapa, temas parecidos. El tama&ntilde;o indica
+			cu&aacute;nto dividi&oacute; a la C&aacute;mara; los puntos grandes son las votaciones re&ntilde;idas. Pas&aacute; el cursor por un punto para ver de qu&eacute; trata.</p>
+		<div class="eje-marco sem-marco">
+			<div class="ley" id="sem-ley"></div>
+			<div class="sem-mapa" id="sem-mapa"></div>
+		</div>
+
+		<h3 class="sem-tit">El mismo mapa, por comunidad</h3>
+		<p class="ex-sub">Los puntos est&aacute;n en el mismo lugar; el color muestra c&oacute;mo vot&oacute; cada comunidad en cada asunto.
+			C4 y C5 van juntas porque en estos 40 asuntos no votan distinto.</p>
+		<div class="sem-esc"><span>todos en contra</span><i></i><span>todos a favor</span><span class="sv">&#9676; sin votos</span></div>
+		<div class="sem-chicos" id="sem-chicos"></div>
+		<p class="sem-nota">Los temas los pusimos a mano, leyendo cada sumario; el modelo no los conoce. El mapa es una proyecci&oacute;n:
+			pasar de 384 dimensiones a 2 deforma las distancias, as&iacute; que sirve para mirar, no para medir. De cada asunto se usa la votaci&oacute;n
+			en general. Las 25 mociones de procedimiento quedan afuera porque su t&iacute;tulo no dice de qu&eacute; tratan.</p>
+	</section>
 </main>
 
 <script>
@@ -180,6 +200,89 @@ window.DIPVIS = {
 		}
 		if (c) { elegir(+c[1]); return; }
 		lista();
+	}
+})();
+
+// Los asuntos de 2026 en un espacio semántico (sale de 2022/armar/05_asuntos.py)
+(function(){
+	var COL_TEMA = ['#3D94D6', '#7340AD', '#DDAA1C', '#B5362A', '#148F6A', '#9AA1A9'];
+	var IZQ = [5, 25];   // Mercosur–UE, Hojarasca
+	var NO = [181, 54, 42], MEDIO = [207, 201, 186], SI = [42, 111, 176];
+	var sec = document.getElementById('asuntos'), tip, A;
+
+	function mezcla(a, b, t){ return 'rgb(' + a.map(function(x, i){ return Math.round(x + (b[i] - x) * t); }).join(',') + ')'; }
+	function colorVoto(p){ return p == null ? null : p < .5 ? mezcla(NO, MEDIO, p * 2) : mezcla(MEDIO, SI, (p - .5) * 2); }
+	function pct(p){ return p == null ? 'sin votos' : Math.round(p * 100) + ' %'; }
+	function esc(s){ return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;'); }
+	function escala(W, H, m){
+		var xs = A.asuntos.map(function(a){ return a.x; }), ys = A.asuntos.map(function(a){ return a.y; });
+		var x0 = Math.min.apply(null, xs), x1 = Math.max.apply(null, xs), y0 = Math.min.apply(null, ys), y1 = Math.max.apply(null, ys);
+		return { x: function(v){ return m + (v - x0) / (x1 - x0) * (W - 2 * m); }, y: function(v){ return m + (v - y0) / (y1 - y0) * (H - 2 * m); } };
+	}
+
+	fetch('data/asuntos_2026.json').then(function(r){ return r.json(); }).then(function(json){
+		A = json;
+		document.getElementById('sem-ley').innerHTML = A.temas.map(function(t, i){
+			return '<span class="ley-item"><i style="background:' + COL_TEMA[i] + '"></i>' + esc(t) + '</span>';
+		}).join('');
+		grande();
+		chicos();
+		tip = document.createElement('div'); tip.className = 'sem-tip'; tip.hidden = true;
+		document.querySelector('.sem-marco').appendChild(tip);
+		sec.addEventListener('mouseover', function(e){ var c = e.target.closest('circle.a'); if (c) foco(+c.dataset.k, c, e); });
+		sec.addEventListener('mousemove', function(e){ if (!tip.hidden && e.target.closest('#sem-mapa circle.a')) mover(e); });
+		sec.addEventListener('mouseout', function(e){ if (e.target.closest('circle.a')) foco(null); });
+	});
+
+	function grande(){
+		var W = 1120, H = 620, s = escala(W, H, 46), out = '';
+		A.asuntos.forEach(function(a, k){
+			var div = 2 * Math.min(a.si, a.no) / (a.si + a.no), r = 9 + 9 * div, x = s.x(a.x), y = s.y(a.y);
+			out += '<circle class="a" data-k="' + k + '" cx="' + x.toFixed(0) + '" cy="' + y.toFixed(0) + '" r="' + r.toFixed(1) +
+				'" fill="' + COL_TEMA[a.tema] + '" fill-opacity=".88" stroke-width="2"></circle>';
+			// rótulos a la izquierda donde a la derecha se pisan con otro
+			var izq = IZQ.indexOf(a.od) >= 0;
+			if (a.corto) out += '<text class="rot-a" x="' + (izq ? x - r - 5 : x + r + 5).toFixed(0) + '" y="' + (y + 5).toFixed(0) + '"' +
+				(izq ? ' text-anchor="end"' : '') + '>' + esc(a.corto) + '</text>';
+		});
+		document.getElementById('sem-mapa').innerHTML = '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="Mapa de los 40 asuntos de 2026 por tema">' + out + '</svg>';
+	}
+
+	function chicos(){
+		var W = 340, H = 230, s = escala(W, H, 18);
+		document.getElementById('sem-chicos').innerHTML = A.grupos.map(function(g, j){
+			var pts = '', vs = [];
+			A.asuntos.forEach(function(a, k){
+				var p = a.v[j], c = colorVoto(p);
+				if (p != null) vs.push(p);
+				pts += '<circle class="a' + (c ? '' : ' sv') + '" data-k="' + k + '" cx="' + s.x(a.x).toFixed(0) + '" cy="' + s.y(a.y).toFixed(0) +
+					'" r="7.5" stroke-width="1.5"' + (c ? ' fill="' + c + '"' : ' stroke-dasharray="3 3"') + '><title>O.D. ' + a.od + ' · ' +
+					esc(a.corto || a.s.slice(0, 60)) + ': ' + pct(p) + ' a favor</title></circle>';
+			});
+			var media = vs.reduce(function(x, y){ return x + y; }, 0) / vs.length;
+			return '<figure><figcaption><b>' + g.c + ' &middot; ' + g.rot + '</b><span>a favor en ' + pct(media) +
+				' de los asuntos, en promedio</span></figcaption><svg viewBox="0 0 ' + W + ' ' + H + '">' + pts + '</svg></figure>';
+		}).join('');
+	}
+
+	// el mismo asunto se marca en todos los mapas; el globo, sólo en el grande
+	function foco(k, c, e){
+		sec.classList.toggle('con-foco', k != null);
+		[].forEach.call(sec.querySelectorAll('circle.a.on'), function(x){ x.classList.remove('on'); });
+		if (k == null) { tip.hidden = true; return; }
+		[].forEach.call(sec.querySelectorAll('circle.a[data-k="' + k + '"]'), function(x){ x.classList.add('on'); });
+		if (!c.closest('#sem-mapa')) return;
+		var a = A.asuntos[k];
+		tip.innerHTML = '<b>O.D. ' + a.od + ' &middot; ' + esc(a.s) + '</b><span>' + A.temas[a.tema] + ' &middot; ' + a.fecha + ' &middot; ' +
+			a.si + ' a favor, ' + a.no + ' en contra</span><span>A favor: ' +
+			A.grupos.map(function(g, j){ return g.c + ' ' + pct(a.v[j]); }).join(' &middot; ') + '</span>';
+		tip.hidden = false;
+		mover(e);
+	}
+	function mover(e){
+		var r = tip.parentElement.getBoundingClientRect(), w = tip.offsetWidth, x = e.clientX - r.left + 14, y = e.clientY - r.top + 14;
+		if (x + w > r.width) x = e.clientX - r.left - w - 14;
+		tip.style.left = Math.max(4, x) + 'px'; tip.style.top = y + 'px';
 	}
 })();
 </script>
