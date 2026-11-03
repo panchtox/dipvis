@@ -173,7 +173,7 @@ window.DIPVIS = {
 				'<polyline fill="none" stroke-width="2.2" stroke="var(--c-' + clase + ')" points="' + pts.map(function(p){ return X(p.year) + ',' + Y(p.idp); }).join(' ') + '"/>' +
 				pts.map(function(p){ return '<circle r="3" fill="var(--c-' + clase + ')" cx="' + X(p.year) + '" cy="' + Y(p.idp) + '"/>'; }).join('') +
 				'<text x="0" y="' + (H + 12) + '">' + x0 + '</text><text x="' + W + '" y="' + (H + 12) + '" text-anchor="end">' + x1 + '</text>' +
-				'<text x="0" y="8">del lado de LLA</text><text x="0" y="' + (H - 10) + '">opositor</text></svg>';
+				'<text x="0" y="8">del lado de LLA</text><text x="0" y="' + (H - 10) + '">del lado opositor</text></svg>';
 			$('#ficha').innerHTML =
 				'<div class="ficha">' +
 				'<img src="2022/' + d.foto + '" alt="">' +
