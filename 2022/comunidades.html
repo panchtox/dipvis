@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<script>(function(){try{var p=new URLSearchParams(location.search).get('theme');var t=p||localStorage.getItem('dipvis-theme')||'editorial';if(['editorial','minimal','ink'].indexOf(t)<0)t='editorial';document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Comunidades 2026 · DipVis</title>
+<script>
+window.DIPVIS = {
+	base: "../",
+	seccion: "comunidades",
+	periodo: "2022&ndash;2026",
+	datos: "Comunidades 2026 &middot; votaciones nominales de la HCDN del 10/12/2025 al 9/9/2026"
+};
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=Archivo:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../styles/theme.css">
+<link rel="stylesheet" href="paleta.css">
+<link rel="stylesheet" href="../styles/explorar.css">
+<script src="../theme-init.js"></script>
+<script src="../explorar.js"></script>
+</head>
+<body data-app>
+<ul class="menu"></ul>
+<main class="ex">
+	<header class="ex-head">
+		<p class="viz-kicker">2026 &middot; Comunidades</p>
+		<h1 class="viz-title">Las comunidades de 2026, una por una</h1>
+		<p class="viz-lede">Dos diputados quedan unidos si votaron parecido en 2026; un algoritmo de detecci&oacute;n de comunidades busca los grupos
+			que est&aacute;n m&aacute;s unidos entre s&iacute; que con el resto. Las comunidades van numeradas de izquierda a derecha del eje.
+			Pas&aacute; el cursor por una tarjeta (o tocala) para ver qu&eacute; la separa de la vecina.</p>
+		<p class="ex-nota">El algoritmo encontr&oacute; diez. Las tres de La Libertad Avanza (C8, C9 y C10) no tienen ni una votaci&oacute;n
+			en la que voten distinto: la divisi&oacute;n era ruido de la estimaci&oacute;n, as&iacute; que ac&aacute; van como una sola.</p>
+	</header>
+
+	<section class="eje-marco" aria-label="Los diputados de 2026 sobre el eje">
+		<div id="eje"></div>
+		<div class="ley" id="ley"></div>
+	</section>
+
+	<section class="grilla" id="grilla" aria-label="Comunidades"></section>
+
+	<section class="quienes" id="quienes">
+		<h2 class="ex-sec" id="q-titulo">Qui&eacute;n es qui&eacute;n</h2>
+		<p class="ex-sub" id="q-sub">Eleg&iacute; una comunidad o busc&aacute; un apellido. Cada nombre lleva a su trayectoria 2022&ndash;2026.</p>
+		<div class="quienes-barra">
+			<div id="chips" style="display:flex;flex-wrap:wrap;gap:6px"></div>
+			<input class="buscar" id="q" type="search" placeholder="Buscar un apellido&hellip;" aria-label="Buscar un diputado">
+		</div>
+		<div class="gente" id="gente"></div>
+	</section>
+</main>
+
+<script>
+(function(){
+	var $ = function(s){ return document.querySelector(s); };
+	var D, COMS, eje, elegida = null, busca = '', marcado = null;
+
+	fetch('data/comunidades.json').then(function(r){ return r.json(); }).then(function(json){
+		D = json.diputados; COMS = json.comunidades;
+		DV.leyenda($('#ley'));
+		eje = DV.eje($('#eje'), D, {
+			coms: COMS,
+			alHover: function(d){ foco(d ? d.c : null, d ? d.id : null); },
+			alTramo: function(c){ foco(c); },
+			alClick: function(d){ elegir(d.c, d.id); },
+			alClickTramo: function(c){ elegir(c); }
+		});
+		tarjetas();
+		chips();
+		desdeHash();
+		window.addEventListener('hashchange', desdeHash);
+	});
+
+	function foco(c, id){
+		eje.foco(c != null ? c : elegida, id != null ? id : marcado);
+	}
+
+	function ids(c){ return D.filter(function(d){ return d.c === c; }).map(function(d){ return d.id; }); }
+	function linkTrayectorias(c){ return 'index.html#dips=' + ids(c).join(',') + '&t=' + encodeURIComponent('la comunidad C' + c); }
+
+	function tarjetas(){
+		$('#grilla').innerHTML = COMS.map(function(c){
+			var m = D.filter(function(d){ return d.c === c.c; });
+			var pts = m.map(function(d){ return '<i style="background:' + DV.COLOR[d.f] + '"></i>'; }).join('');
+			var antes = c.antes.length > 1 ? '<span class="antes">antes C' + c.antes.join(', C').replace(/, C(\d+)$/, ' y C$1') + '</span>' : '';
+			return '<article class="t" tabindex="0" data-c="' + c.c + '" aria-label="Comunidad C' + c.c + ', ' + c.n + ' diputados">' +
+				'<div class="g">' +
+				'<div class="cara frente">' +
+					'<div class="cab"><span class="n">C' + c.c + '</span><b>' + c.n + ' diputados</b></div>' +
+					'<p class="rango">' + (c.lo === c.hi ? 'punto ideal ' + c.lo : 'puntos ideales de ' + c.lo + ' a ' + c.hi) + '</p>' +
+					'<div class="pts">' + pts + '</div>' +
+					'<p class="comp">' + c.comp + '</p>' +
+					'<p class="med">En el medio: ' + c.medio.join(', ') + '</p>' +
+					antes + '<span class="vuelta-hint">dar vuelta &#8635;</span>' +
+				'</div>' +
+				'<div class="cara dorso">' +
+					'<div class="cab"><span class="n">C' + c.c + '</span><span class="tag ' + c.tipo + '">' + c.rot + '</span></div>' +
+					'<h4>Qu&eacute; la separa</h4><p>' + c.separa + '</p>' +
+					'<h4>Hip&oacute;tesis</h4><p>' + c.hip + '</p>' +
+					'<div class="acciones"><button type="button" data-ver="' + c.c + '">Qui&eacute;nes son &darr;</button>' +
+					'<a href="' + linkTrayectorias(c.c) + '">Sus trayectorias &rarr;</a></div>' +
+				'</div></div></article>';
+		}).join('');
+
+		var tocable = window.matchMedia('(hover: none)').matches;
+		[].forEach.call(document.querySelectorAll('.t'), function(t){
+			var c = +t.dataset.c;
+			t.addEventListener('mouseenter', function(){ foco(c); });
+			t.addEventListener('mouseleave', function(){ foco(null); });
+			t.addEventListener('click', function(e){
+				if (e.target.closest('a,button')) return;
+				if (tocable) t.classList.toggle('on'); else elegir(c);
+			});
+			t.addEventListener('keydown', function(e){
+				if (e.target !== t) return;
+				if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); t.classList.toggle('on'); }
+			});
+		});
+		$('#grilla').addEventListener('click', function(e){
+			var b = e.target.closest('[data-ver]');
+			if (b) { elegir(+b.dataset.ver); $('#quienes').scrollIntoView({ behavior: 'smooth' }); }
+		});
+	}
+
+	function chips(){
+		$('#chips').innerHTML = '<button class="chip" data-c="">Todas</button>' +
+			COMS.map(function(c){ return '<button class="chip" data-c="' + c.c + '">C' + c.c + '</button>'; }).join('');
+		$('#chips').addEventListener('click', function(e){
+			var b = e.target.closest('.chip'); if (!b) return;
+			elegir(b.dataset.c ? +b.dataset.c : null);
+		});
+		$('#q').addEventListener('input', function(e){ busca = DV.plano(e.target.value.trim()); lista(); });
+	}
+
+	function elegir(c, id){
+		elegida = c; marcado = id || null;
+		busca = ''; $('#q').value = '';
+		[].forEach.call(document.querySelectorAll('.t'), function(t){ t.classList.toggle('elegida', +t.dataset.c === c); });
+		foco(null);
+		lista();
+		var h = c == null ? '' : (id ? '#dip=' + id : '#c=' + c);
+		if (location.hash !== h) history.replaceState(null, '', location.pathname + h);
+	}
+
+	function lista(){
+		var m;
+		if (busca) m = D.filter(function(d){ return DV.plano(d.n).indexOf(busca) >= 0; });
+		else if (elegida != null) m = D.filter(function(d){ return d.c === elegida; });
+		else m = [];   // sin elegir nada, la lista queda vacía: 258 tarjetas de golpe son demasiadas
+		var com = COMS.filter(function(c){ return c.c === elegida; })[0];
+		$('#q-titulo').textContent = busca ? 'Resultados' : com ? 'Comunidad C' + com.c + ' · ' + com.n + ' diputados' : 'Quién es quién';
+		$('#q-sub').innerHTML = busca ? m.length + (m.length === 1 ? ' diputado' : ' diputados') :
+			com ? com.comp + '. De izquierda a derecha del eje; cada nombre lleva a su trayectoria. <a href="' + linkTrayectorias(com.c) + '">Ver las ' + com.n + ' trayectorias juntas &rarr;</a>' :
+			'Eleg&iacute; una comunidad o busc&aacute; un apellido entre los ' + D.length + ' diputados de 2026. Cada nombre lleva a su trayectoria 2022&ndash;2026.';
+		[].forEach.call(document.querySelectorAll('.chip'), function(b){
+			b.classList.toggle('on', !busca && (b.dataset.c ? +b.dataset.c === elegida : elegida == null));
+		});
+		$('#gente').innerHTML = m.length ? m.map(function(d){
+			return '<a href="index.html#dips=' + d.id + '" data-id="' + d.id + '"' + (d.id === marcado ? ' class="marcado"' : '') + '>' +
+				'<img loading="lazy" src="' + d.foto + '" alt="">' +
+				'<span class="q-txt"><span class="q-n"><i style="background:' + DV.COLOR[d.f] + '"></i>' + DV.persona(d.n) + '</span>' +
+				'<span class="q-b">' + d.b + ' &middot; ' + d.p + '</span>' +
+				'<span class="q-x">C' + d.c + ' &middot; punto ideal ' + DV.num(d.x) + '</span></span></a>';
+		}).join('') : busca ? '<p class="vacio">No hay diputados de 2026 con ese nombre.</p>' : '';
+	}
+	$('#gente').addEventListener('mouseover', function(e){
+		var a = e.target.closest('a[data-id]'); if (a) { var d = D.filter(function(x){ return x.id === +a.dataset.id; })[0]; foco(d.c, d.id); }
+	});
+	$('#gente').addEventListener('mouseleave', function(){ foco(null); });
+
+	// comunidades.html#c=3 o #dip=123
+	function desdeHash(){
+		var c = location.hash.match(/c=(\d+)/), d = location.hash.match(/dip=(\d+)/);
+		if (d) {
+			var x = D.filter(function(y){ return y.id === +d[1]; })[0];
+			if (x) { elegir(x.c, x.id); setTimeout(function(){ var a = document.querySelector('.gente a.marcado'); if (a) a.scrollIntoView({ block: 'center', behavior: 'smooth' }); }, 60); return; }
+		}
+		if (c) { elegir(+c[1]); return; }
+		lista();
+	}
+})();
+</script>
+</body>
+</html>

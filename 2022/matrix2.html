@@ -6,6 +6,7 @@
 		<script>
 		window.DIPVIS = {
 			base: "../",
+			seccion: "provincias",   // qué entrada del menú compartido queda marcada
 			periodo: "2022&ndash;2026",
 			anios: [2022, 2026],
 			lede: "Cada hilo es la trayectoria de un diputado al votar en la C&aacute;mara entre 2022 y 2026. " +
@@ -35,30 +36,9 @@
 <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=Archivo:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../styles/theme.css">
 <link rel="stylesheet" href="paleta.css">
+<link rel="stylesheet" href="../styles/explorar.css">
 <script src="../theme-init.js"></script>
-		<ul class="menu">
-			<li><a href="index.html">Home</a></li>
-			<li><a>Posturas de voto</a>
-				<ul>
-					<li><a href="../datosOriginales.html">Definici&oacute;n y datos originales</a></li>
-					<li><a href="../disclaimer.html">Aclaraciones</a></li>
-				</ul>
-			</li>
-			<li><a>Cr&eacute;ditos</a>
-				<ul>
-					<li><a href="../equipo.html">Equipo de trabajo</a></li>
-					<li><a href="../agradecimientos.html">Agradecimientos</a></li>
-				</ul>
-			</li>
-			<li><a>Tutorial</a>
-		<ul>
-			<li><a href="../tutorialMatrix.html">Mapa de calor</a></li>
-		</ul>
-	</li>
-			<li><a href="../">2006&ndash;2011</a></li>
-			<li><a href="../requerimientos.html">Requerimientos</a>
-			</li>
-		</ul>
+		<ul class="menu"></ul>
 		<table>
 			<tr>
 				<td id="controls">
@@ -94,7 +74,7 @@
 		</table>
 	<script type="text/javascript">
 	var prov = document.URL.split('#')[1];
-	var provName = document.URL.split('#')[2];
+	var provName = decodeURIComponent(document.URL.split('#')[2] || '');   // los enlaces del menú traen tildes
 	if(!prov){ prov = '6'; }                 // por defecto: provincia más grande
 	if(!provName){ provName = 'Buenos Aires'; }
 	provName = provName.replace(/%20/g,' ');	

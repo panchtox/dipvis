@@ -81,18 +81,52 @@
     return e;
   }
   function pageType() {
+    if (document.body.hasAttribute("data-app")) return "app";   // portada y comunidades: se arman solas
     if (document.getElementById("posturas")) return "home";
     if (document.getElementById("heatmap")) return "matrix";
     return "doc";
   }
 
+  // ---- MENÚ 2022–2026 (opcional, window.DIPVIS.seccion) ----
+  // Las páginas nuevas comparten un menú: una entrada por cada manera de explorar.
+  var PROVINCIAS = [[6, "Buenos Aires"], [2, "C.A.B.A."], [10, "Catamarca"], [22, "Chaco"], [26, "Chubut"],
+    [14, "C&oacute;rdoba"], [18, "Corrientes"], [30, "Entre R&iacute;os"], [34, "Formosa"], [38, "Jujuy"],
+    [42, "La Pampa"], [46, "La Rioja"], [50, "Mendoza"], [54, "Misiones"], [58, "Neuqu&eacute;n"],
+    [62, "R&iacute;o Negro"], [66, "Salta"], [70, "San Juan"], [74, "San Luis"], [78, "Santa Cruz"],
+    [82, "Santa Fe"], [86, "Santiago del Estero"], [94, "Tierra del Fuego"], [90, "Tucum&aacute;n"]];
+  window.DIPVIS_PROVINCIAS = PROVINCIAS;
+  function armarMenu(menu) {
+    var R = BASE, A = BASE + "2022/";
+    var provs = PROVINCIAS.map(function (p) {
+      return '<li><a href="' + A + 'matrix2.html#' + p[0] + '#' + p[1] + '">' + p[1] + '</a></li>';
+    }).join("");
+    menu.innerHTML =
+      '<li><a href="' + A + 'index.html" data-s="trayectorias">Trayectorias</a></li>' +
+      '<li><a href="' + A + 'comunidades.html" data-s="comunidades">Comunidades</a></li>' +
+      '<li><a data-s="provincias">Provincias <span class="menu-flecha" aria-hidden="true">&#9662;</span></a><ul class="menu-prov">' + provs + '</ul></li>' +
+      '<li><a href="' + R + '2006-2011.html">2006&ndash;2011</a></li>' +
+      '<li><a>Acerca <span class="menu-flecha" aria-hidden="true">&#9662;</span></a><ul>' +
+        '<li><a href="' + R + 'datosOriginales.html">C&oacute;mo se hizo</a></li>' +
+        '<li><a href="' + R + 'disclaimer.html">Aclaraciones</a></li>' +
+        '<li><a href="' + R + 'tutorialMatrix.html">C&oacute;mo leer el mapa de calor</a></li>' +
+        '<li><a href="' + R + 'equipo.html">Equipo</a></li>' +
+        '<li><a href="' + R + 'agradecimientos.html">Agradecimientos</a></li>' +
+      '</ul></li>';
+    var act = menu.querySelector('[data-s="' + CFG.seccion + '"]');
+    if (act) act.classList.add("is-active");
+  }
+
   function build() {
     var menu = document.querySelector("ul.menu");
+    if (menu && CFG.seccion && !menu.hasAttribute("data-armado")) {
+      menu.setAttribute("data-armado", "");
+      armarMenu(menu);
+    }
 
     // ---- marca ----
     if (menu && !menu.querySelector(".brand")) {
       var brand = el("a", "brand");
-      brand.href = "index.html";
+      brand.href = BASE + "index.html";   // la marca siempre lleva a la portada
       brand.innerHTML =
         '<span class="brand-mark"></span>' +
         '<span class="brand-text">' +
@@ -105,7 +139,7 @@
     }
 
     // ---- marcar link activo ----
-    if (menu) {
+    if (menu && !CFG.seccion) {
       var here = (location.pathname.split("/").pop() || "index.html");
       var links = menu.querySelectorAll("a[href]");
       for (var i = 0; i < links.length; i++) {
@@ -134,7 +168,11 @@
 
     var type = pageType();
     if (type === "home") enhanceHome();
-    if (type === "matrix") enhanceMatrix();
+    if (type === "matrix") {
+      enhanceMatrix();
+      // el mapa de calor lee la provincia del # sólo al cargar: si el menú cambia de provincia, recargar
+      window.addEventListener("hashchange", function () { location.reload(); });
+    }
     if (type === "doc") enhanceDoc();
 
     injectFooter(type);

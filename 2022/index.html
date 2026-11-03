@@ -6,6 +6,7 @@
 		<script>
 		window.DIPVIS = {
 			base: "../",
+			seccion: "trayectorias",   // qué entrada del menú compartido queda marcada
 			diapositivas: true,   // el scroll encaja en el texto, el gráfico y el pie
 			periodo: "2022&ndash;2026",
 			anios: [2022, 2026],
@@ -274,31 +275,10 @@
 <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=Archivo:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../styles/theme.css">
 <link rel="stylesheet" href="paleta.css">
+<link rel="stylesheet" href="../styles/explorar.css">
 <script src="../theme-init.js"></script>
 <script src="../olas.js"></script>
-		<ul class="menu">
-			<li><a href="index.html">Home</a></li>
-			<li><a>Posturas de voto</a>
-				<ul>
-					<li><a href="../datosOriginales.html">Definici&oacute;n y datos originales</a></li>
-					<li><a href="../disclaimer.html">Aclaraciones</a></li>
-				</ul>
-			</li>
-			<li><a>Cr&eacute;ditos</a>
-				<ul>
-					<li><a href="../equipo.html">Equipo de trabajo</a></li>
-					<li><a href="../agradecimientos.html">Agradecimientos</a></li>
-				</ul>
-			</li>
-			<li><a>Tutorial</a>
-				<ul>
-					<li><a href="../tutorialMatrix.html">Mapa de calor</a></li>
-				</ul>
-			</li>
-			<li><a href="../">2006&ndash;2011</a></li>
-			<li><a href="../requerimientos.html">Requerimientos</a>
-			</li>
-		</ul>
+		<ul class="menu"></ul>
 		<table>
 			<tr>
 				<td style="padding-left:10px" id="combo">
@@ -426,6 +406,48 @@
 			function unselectCurrent(selection){
 				selection.classed('current', false);
 			}			
+		</script>
+		<script type="text/javascript">
+		/*
+		* Llegar con diputados destacados desde otra vista: index.html#dips=12,40,77&t=Comunidad%20C8
+		* Hasta 6 entran al buscador; si son más (una comunidad entera) se destacan con un aviso para quitarlos.
+		*/
+		(function(){
+			// si sólo cambia el # (misma página), volver a cargar para aplicar la nueva selección
+			window.addEventListener('hashchange', function(){ if (/dips=/.test(location.hash)) location.reload(); });
+			var m = location.hash.match(/dips=([\d,]+)/);
+			if (!m) return;
+			var ids = m[1].split(',').filter(Boolean);
+			var t = (location.hash.match(/[#&]t=([^&]*)/) || [])[1];
+			t = t ? decodeURIComponent(t) : ids.length + ' diputados';
+			function listo(){
+				return window.dips && document.querySelector('.posturadip') &&
+					document.querySelector('#diputados option[value="' + ids[0] + '"]') && document.querySelector('#diputados_chzn');
+			}
+			(function esperar(){ if (!listo()) return setTimeout(esperar, 120); aplicar(); })();
+			function aplicar(){
+				if (ids.length <= 6) {
+					ids.forEach(function(id){ $('#diputados option[value="' + id + '"]').prop('selected', true); });
+					$('#diputados').trigger('liszt:updated');
+					actualizarFideos();
+				} else {
+					d3.selectAll('.posturadip').classed('disabled', true);
+					ids.forEach(function(id){ d3.select('#dip' + id).classed('disabled', false).classed('enabled', true).moveToFront(); });
+					var aviso = $('<div class="llegada"><span>Destacando <b></b> &middot; ' + ids.length + ' diputados</span>' +
+						'<button type="button">Quitar</button></div>');
+					aviso.find('b').text(t);
+					aviso.find('button').on('click', function(){
+						d3.selectAll('.posturadip').classed('enabled', false);
+						actualizarFideos();
+						aviso.remove();
+						history.replaceState(null, '', location.pathname);
+					});
+					$('#combo').prepend(aviso);
+				}
+				var salto = document.querySelector('.viz-salto');
+				if (salto) setTimeout(function(){ salto.click(); }, 150);
+			}
+		})();
 		</script>
 	</body>
 	<script>

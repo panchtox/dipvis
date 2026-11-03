@@ -1,408 +1,193 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
-<html>
-	<head>
-		<script>(function(){try{var p=new URLSearchParams(location.search).get('theme');var t=p||localStorage.getItem('dipvis-theme')||'editorial';if(['editorial','minimal','ink'].indexOf(t)<0)t='editorial';document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
-		<meta charset="UTF-8" />
-		<link rel="stylesheet" type="text/css" href="styles/menu.css">
-		<link rel="stylesheet" href="styles/idps.css">
-		<link rel="stylesheet" href="styles/chosen.css">
-		<script src="https://d3js.org/d3.v3.min.js" charset="utf-8"></script>
-		<script type="text/JavaScript" src="//ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
-		<script src="lib/jquery.sparkline.min.js"></script>
-		<script src="lib/chosen.jquery.js" type="text/javascript"></script>
-		<script type="text/javascript">
-		var dips,ar=Array(),idps=Array();
-		var viewportWidth  = document.documentElement.clientWidth
-			,viewportHeight = document.documentElement.clientHeight;//Toman ancho y alto de pantalla
-		var h=viewportHeight*0.80, w=viewportWidth*0.65, margin1=30,pomo,cuadro=w/4,duration=1500,delay=1000;
-		var color10=d3.scale.category10();//Paleta categorica de 10 colores
-/*
-*COMBO BOX
-*/
-		d3.json("data/combo_nombres.json", function(json) {//trae el json con el listado de nombres con los id correspondientes
-				nombres=json;	
-				for (i=0;i<nombres.length;i++){
-					$('<option/>').val(nombres[i].idip).html(nombres[i].nombre).appendTo('#diputados');
-				}
-				$(".chzn-select").chosen({no_results_text: "No hay: "});$(".chzn-select-deselect").chosen({allow_single_deselect:true});
-		});
-
-		function actualizarFideos() {//Destaca la linea de los diputados seleccionados en el combobox
-			var Dips = recuperar_seleccion('diputados');
-			d3.selectAll('.posturadip').classed('disabled', true);
-			d3.selectAll('.provincia').classed('disabled', true);
-			
-			if (Dips.length) {
-				for (var i = 0; i < Dips.length; i++) {
-					d3.select("#" + Dips[i]).classed('disabled', false);
-					d3.select("#" + Dips[i]).classed('enabled', true);
-					d3.select("#" + Dips[i]).moveToFront();
-
-				};
-			} else{
-				dips.forEach(
-					function(d){
-						d3.select("#dip"+d.id).classed('disabled', false);
-						d3.selectAll('.provincia').classed('disabled', false);
-						d3.select("#dip"+d.id).classed('enabled', false);
-					}
-				);
-			};
-		}
-		function recuperar_seleccion(id) {//Devuelve array con la seleccion del combobox
-			var valores = [];
-			var obj = document.getElementById(id);
-			for(var i=0; i<obj.length; i++) {
-				if (obj[i].selected) {
-					valores.push("dip" + obj[i].value);
-				}
-			}
-			return(valores);
-		}
-/***/
-
-/*
-*Curvas de Andrews de las posturas de los diputados
-*/
-		d3.json("data/fideos_dips2.json", function(json) {//Trae los datos principales
-			dips=json.diputados;
-			dips.forEach(function(d){(d.points.forEach(function(y){ar.push(y.year)}))});//rango de anios
-			dips.forEach(function(d){(d.points.forEach(function(y){idps.push(y.idp)}))});//rango de puntos ideales
-			d3.select("#diputados").style("width",(viewportWidth*0.60)+"px");
-
-			var svg=d3.select("#posturas")
- 			.style("width",w+"px")
- 			.append("svg")
- 			.attr("width",w)
- 			.attr("height",h);
-
- 			d3.select("#diputados_chzn").style("width",(w)+"px");//igualo ancho del combobox al del panel del grafico
-
- 			var capaRef=svg.append("g").attr("class","ref");
-		 	var capa1=svg.append("g").attr("class","fondo1");
-
-		 	var formatYear=d3.time.format("%Y").parse;
-			var idpsXscale=d3.time.scale().domain([2006,2011]).range([0+margin1,w-margin1]);
-			var idpsYscale=d3.scale.linear().domain([d3.min(idps),d3.max(idps)]).range([h-margin1,0+margin1]);
-			var color10=d3.scale.category10();
-			idps=0;
-			ar=0;
-			estructura=0;
-			var linefunction = d3.svg.line()
-				.interpolate("basis")
-				.x(function(d) { return idpsXscale(d.year);})
-				.y(function(d) { return idpsYscale(d.idp);});
-
-			dips.forEach(
-				function(d){//fabricamos una linea por cada diputado, reflejando sus posturas en el tiempo
-					var posicion = 'variable';
-					if(d.col == '#bbf098'){
-						posicion = 'opositora';
-					}
-					if(d.col == '#6b9eea'){
-						posicion = 'oficialista';
-					}
-
-					var lineGraph = capa1.append("path")
-						.attr("d", linefunction(d.points))
-						.attr("class","posturadip " + posicion + " p" + d.distrito)
-						.attr("shape-rendering","crispEdges")
-						.attr("id",("dip"+d.id))
-						.attr("nombre",d.nombre)
-						.attr("bloque",d.bloque)
-						.attr("foto",d.foto)
-						.attr("provincia",d.distrito)
-						.on("mouseover", function() {
-							selectCurrent(d3.select(this));
-							selectCurrent(d3.selectAll("#p"+d3.select(this).attr("provincia")));
-							d3.select("#tooltip").select("img").attr("src","");
-							d3.select("#tooltip")
-								.attr("class","")
-								.select("strong")
-								.text(d3.select(this).attr("nombre"));
-							d3.select("#tooltip")
-								.select("bloque")
-								.text(d3.select(this).attr("bloque"));
-							d3.select("#tooltip")
-								.select("img")
-								.attr("src",(d3.select(this).attr("foto")));
-							
-							$('#tristate').sparkline(d.estados, {type:'tristate', posBarColor:'#9cab19',negBarColor:'#1e64cd'});
-						})
-						.on("mouseout", function() {
-							
-							unselectCurrent(d3.select(this));
-							unselectCurrent(d3.selectAll("#p"+d3.select(this).attr("provincia")));
-							
-							d3.select("#tooltip").attr("class","hidden");
-
-						});
-				}
-			);
-			var xAxis=d3.svg.axis().scale(idpsXscale).orient("bottom").tickFormat(d3.format("d"));
-			svg.append("g").attr("class","xaxis").attr("transform","translate(0,"+(h-margin1)+")").call(xAxis);
-
-			capa1.append("text")
-				.attr("x", (w / 2))
-				.attr("y", 20)
-				.attr("text-anchor", "middle")
-				.style("font-size", "16px")
-				.text("Postura de los diputados al votar los proyectos de ley durante el periodo 2006 - 2011");
-			/*
-			* Dibuja flechas del eje y
-			*/
-				var capaFlechas=svg.append("g").attr("class","flechas");
-
-				capaFlechas.append("marker")
-					.attr("id", "triangle-start")
-					.attr("viewBox", "0 0 10 10")
-					.attr("refX", 10)
-					.attr("refY", 5)
-					.attr("markerWidth", -6)
-					.attr("markerHeight", 6)
-					.attr("orient", "auto")
-					.append("path")
-					.attr("d", "M 0 0 L 10 5 L 0 10 z");
-
-				capaFlechas.append("marker")
-					.attr("id", "triangle-end")
-					.attr("viewBox", "0 0 10 10")
-					.attr("refX", 10)
-					.attr("refY", 5)
-					.attr("markerWidth", 6)
-					.attr("markerHeight", 6)
-					.attr("orient", "auto")
-					.append("path")
-					.attr("d", "M 0 0 L 10 5 L 0 10 z");
-
-				capaFlechas.append("line")
-					.attr("class", "arrow")
-					.attr("x1", 20)
-					.attr("x2", 20)
-					.attr("y1", idpsYscale(2.2))
-					.attr("y2", idpsYscale(0.02))
-					.attr("marker-start", "url(#triangle-start)")
-					.style("stroke","black");
-				capaFlechas.append("line")
-					.attr("class", "arrow")
-					.attr("x1", 20)
-					.attr("x2", 20)
-					.attr("y1", idpsYscale(-2.2))
-					.attr("y2", idpsYscale(-0.02))
-					.attr("marker-start", "url(#triangle-start)")
-					.style("stroke","black");
-				capaFlechas.append('text')
-					.text('Oposición')
-					.attr('y',idpsYscale(2.3))
-					.attr('x',20);
-				capaFlechas.append('text')
-					.text('Oficialismo')
-					.attr('y',idpsYscale(-2.3))
-					.attr('x',20);
-			/**/
-			/*
-			* Referencia
-			*/
-				var ref={"posturas":[{"postura":"opositora constante","color":"#bbf098","yrel":1},{"postura":"variable","color":"#f0a198","yrel":2},{"postura":"oficialista constante","color":"#6b9eea","yrel":3}]},sbul=11;
-				capaRef.selectAll('rect')
-					.data(ref.posturas)
-					.enter()
-					.append('rect')
-					.attr('x',w-(w/5))
-					.attr('y',function(d){return h-90+(sbul*d.yrel);})
-					.attr('width',sbul-1)
-					.attr('height',sbul-1)
-					.attr('fill',function(d){return d.color;});
-				capaRef.selectAll('text')
-					.data(ref.posturas)
-					.enter()
-					.append('text')
-					.text(function(d){return d.postura})
-					.attr('x',w-(w/5)+12)
-					.attr('y',function(d){return h-82+(sbul*d.yrel);});
-			/***/
-		});
-
-/* Funcion que permite que un objeto pase al frente de la imagen */
-		d3.selection.prototype.moveToFront = function() {//metodo que hace que un objeto pase al frente de la imagen -CREDITO
-				return this.each(function() { 
-					this.parentNode.appendChild(this); 
-				}); 
-		};
-/***/
-
-
-		</script>
-		
-	</head>
-	<body>
-		<!-- DipVis theme layer -->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<script>(function(){try{var p=new URLSearchParams(location.search).get('theme');var t=p||localStorage.getItem('dipvis-theme')||'editorial';if(['editorial','minimal','ink'].indexOf(t)<0)t='editorial';document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DipVis · Cómo vota la Cámara</title>
+<script>
+window.DIPVIS = {
+	base: "",
+	seccion: "inicio",
+	periodo: "2022&ndash;2026",
+	datos: "Datos 2022&ndash;2026 &middot; votaciones nominales de la HCDN hasta el 9/9/2026"
+};
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=Archivo:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="styles/theme.css">
+<link rel="stylesheet" href="2022/paleta.css">
+<link rel="stylesheet" href="styles/explorar.css">
 <script src="theme-init.js"></script>
-<script src="olas.js"></script>
-		<ul class="menu">
-			<li><a href="index.html">Home</a></li>
-			<li><a>Posturas de voto</a>
-				<ul>
-					<li><a href="datosOriginales.html">Definici&oacute;n y datos originales</a></li>
-					<li><a href="disclaimer.html">Aclaraciones</a></li>
-				</ul>
-			</li>
-			<li><a>Cr&eacute;ditos</a>
-				<ul>
-					<li><a href="equipo.html">Equipo de trabajo</a></li>
-					<li><a href="agradecimientos.html">Agradecimientos</a></li>
-				</ul>
-			</li>
-			<li><a>Tutorial</a>
-				<ul>
-					<li><a href="tutorialMatrix.html">Mapa de calor</a></li>
-				</ul>
-			</li>
-			<li><a href="2022/">2022&ndash;2026</a></li>
-			<li><a href="requerimientos.html">Requerimientos</a>
-			</li>
-		</ul>
-		<table>
-			<tr>
-				<td style="padding-left:10px" id="combo">
-					<div>
-						<select data-placeholder="Clickee para seleccionar diputados..." class="chzn-select" multiple="multiple"  id="diputados" onChange="actualizarFideos();">
-							<option value=""></option>
-						</select>
-					</div>
-				</td>
-				<td>
-				</td>
-			</tr>
-			<tr>
-				<td>
-					<div id="posturas"></div>
-				</td>
-				<td>
-					<div id="mapa"></div>
-				</td>
-			</tr>
-		</table>
-		<div id="tooltip" class="hidden">
-			<span id="tristate">Loading..</span>
-			<img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"></img><br>
-			<strong>Diputado</strong><br>
-			<bloque>bloque</bloque>
+<script src="explorar.js"></script>
+</head>
+<body data-app>
+<ul class="menu"></ul>
+<main class="ex">
+	<header class="hero">
+		<p class="viz-kicker">C&aacute;mara de Diputados &middot; Argentina &middot; 2022&ndash;2026</p>
+		<h1 class="viz-title">C&oacute;mo vota la C&aacute;mara, diputado por diputado</h1>
+		<p class="viz-lede">Con todas las votaciones nominales de un a&ntilde;o, a cada diputado le toca un lugar en una l&iacute;nea: su <em>punto ideal</em>.
+			Los que votan parecido quedan cerca. Abajo est&aacute;n los 258 de 2026; toc&aacute; uno para ver qui&eacute;n es, o eleg&iacute; por d&oacute;nde entrar.</p>
+	</header>
+
+	<section class="eje-marco" aria-label="Los diputados de 2026 sobre el eje">
+		<div id="eje"></div>
+		<div class="ley" id="ley"></div>
+	</section>
+
+	<section class="puertas" aria-label="Qu&eacute; explorar">
+		<a class="puerta" href="2022/index.html">
+			<span class="p-num">01 &middot; Trayectorias</span>
+			<h2>&iquest;C&oacute;mo se movi&oacute; cada uno?</h2>
+			<p>Una l&iacute;nea por diputado, de 2022 a 2026. Qui&eacute;n vot&oacute; siempre del mismo lado y qui&eacute;n cambi&oacute;.</p>
+			<div class="p-dibujo" aria-hidden="true">
+				<svg viewBox="0 0 240 86" preserveAspectRatio="none" fill="none" stroke-width="2" stroke-linecap="round">
+					<line x1="0" y1="43" x2="240" y2="43" stroke="currentColor" stroke-opacity=".25" stroke-dasharray="3 4"/>
+					<path d="M0,16 C60,10 120,22 240,12" stroke="var(--c-of)"/>
+					<path d="M0,24 C70,18 140,30 240,20" stroke="var(--c-of)"/>
+					<path d="M0,64 C60,70 140,60 240,72" stroke="var(--c-op)"/>
+					<path d="M0,72 C80,78 150,66 240,78" stroke="var(--c-op)"/>
+					<path d="M0,58 C70,56 120,36 240,26" stroke="var(--c-va)"/>
+					<path d="M0,30 C60,36 150,60 240,62" stroke="var(--c-va)"/>
+				</svg>
+			</div>
+			<span class="p-ir">Ver las trayectorias &rarr;</span>
+		</a>
+
+		<a class="puerta" href="2022/comunidades.html">
+			<span class="p-num">02 &middot; Comunidades</span>
+			<h2>&iquest;Qui&eacute;n vota con qui&eacute;n?</h2>
+			<p>Los ocho grupos que vot&oacute; la C&aacute;mara en 2026, y la votaci&oacute;n que separa a cada uno de su vecino.</p>
+			<div class="p-dibujo" aria-hidden="true"><svg id="mini-com" viewBox="0 0 240 86"></svg></div>
+			<span class="p-ir">Ver las comunidades &rarr;</span>
+		</a>
+
+		<div class="puerta">
+			<span class="p-num">03 &middot; Provincias</span>
+			<h2>&iquest;Y en mi provincia?</h2>
+			<p>Un mapa de calor con la afinidad entre los diputados de una provincia, a&ntilde;o por a&ntilde;o.</p>
+			<div class="fila">
+				<select id="prov" aria-label="Elegir una provincia"></select>
+				<button class="boton" id="ir-prov" type="button">Ver</button>
+			</div>
 		</div>
-		<script type="text/javascript">
-		$(document).ready(function(){//Lleva el tooltip a la posicion cercana al mouse
-			$('#posturas').mousemove(function(e){
-				// la tarjeta sigue al cursor en todo el gráfico (antes sólo si pageY < 80% del alto de la ventana,
-				// y con el encabezado arriba eso dejaba la tarjeta fuera de la vista)
-				$("#tooltip").css({top: e.pageY, left: e.pageX+30, position:'absolute'});
-				
-			});
+
+		<div class="puerta">
+			<span class="p-num">04 &middot; Un diputado</span>
+			<h2>&iquest;D&oacute;nde est&aacute; tal diputado?</h2>
+			<p>Busc&aacute; un nombre y segu&iacute;lo por las tres vistas.</p>
+			<div class="busca">
+				<input class="buscar" id="q" type="search" autocomplete="off" placeholder="Apellido o nombre&hellip;"
+					aria-label="Buscar un diputado" role="combobox" aria-expanded="false" aria-controls="sugeridos">
+				<ul class="sugeridos" id="sugeridos" role="listbox" hidden></ul>
+			</div>
+			<div id="ficha"></div>
+		</div>
+	</section>
+
+	<section class="archivo">
+		<h2>Antes: 2006&ndash;2011</h2>
+		<p>La primera versi&oacute;n de DipVis, con los votos de los proyectos de ley de 2006 a 2011: las mismas trayectorias y el mismo mapa de calor.</p>
+		<a class="p-ir" href="2006-2011.html">Ir a 2006&ndash;2011 &rarr;</a>
+	</section>
+</main>
+
+<script>
+(function(){
+	var $ = function(s){ return document.querySelector(s); };
+
+	// provincias (la lista la deja theme-init.js)
+	var provs = window.DIPVIS_PROVINCIAS || [];
+	$('#prov').innerHTML = provs.map(function(p){ return '<option value="' + p[0] + '">' + p[1] + '</option>'; }).join('');
+	$('#ir-prov').addEventListener('click', function(){
+		var o = $('#prov').selectedOptions[0];
+		location.href = '2022/matrix2.html#' + o.value + '#' + o.textContent;
+	});
+
+	// dibujo chico de la puerta de comunidades: ocho racimos
+	(function(){
+		var s = '', racimos = [[22,2,'Izquierda'],[52,4,'Peronismo'],[80,6,'Peronismo'],[110,9,'Peronismo'],[148,7,'Otros'],[180,4,'PRO'],[214,11,'LLA']];
+		racimos.forEach(function(r){
+			for (var k = 0; k < r[1] * 2; k++) {
+				var a = k * 2.4, rad = 3 + Math.sqrt(k) * 4.2;
+				s += '<circle cx="' + (r[0] + Math.cos(a) * rad * .7).toFixed(1) + '" cy="' + (43 + Math.sin(a) * rad).toFixed(1) + '" r="3" fill="' + DV.COLOR[r[2]] + '"/>';
+			}
 		});
-		d3.select('#combo').style("width",w+"px");
+		$('#mini-com').innerHTML = s;
+	})();
 
+	Promise.all([
+		fetch('2022/data/fideos_dips2.json').then(function(r){ return r.json(); }),
+		fetch('2022/data/comunidades.json').then(function(r){ return r.json(); })
+	]).then(function(res){
+		var TODOS = res[0].diputados, COM = res[1];
+		var en2026 = {};
+		COM.diputados.forEach(function(d){ en2026[d.id] = d; });
+		DV.leyenda($('#ley'));
+		var eje = DV.eje($('#eje'), COM.diputados, {
+			alClick: function(d){ mostrar(TODOS.filter(function(x){ return x.id === d.id; })[0]); }
+		});
 
-		/*
-		*La parte del mapa
-		*/
-			var mapw=viewportWidth*0.3,maph=h;
-			var mapsvg=d3.select("#mapa")//agregamos un svg para contener el mapa
-					.style("width",viewportWidth*0.30+"px")
-					.style("height",h+"px")
-					.style("margin-left","20px")
-		 			.append("svg")
-		 			.attr("width",mapw)
-		 			.attr("height",maph);
+		// buscador con sugerencias
+		var q = $('#q'), sug = $('#sugeridos'), lista = [], act = -1;
+		function cerrar(){ sug.hidden = true; q.setAttribute('aria-expanded', 'false'); act = -1; }
+		q.addEventListener('input', function(){
+			var t = DV.plano(q.value.trim());
+			if (t.length < 2) { cerrar(); return; }
+			lista = TODOS.filter(function(d){ return DV.plano(d.nombre).indexOf(t) >= 0; }).slice(0, 8);
+			act = -1;
+			sug.innerHTML = lista.length ? lista.map(function(d, i){
+				return '<li role="option" data-i="' + i + '">' + DV.persona(d.nombre) + '<span>' + d.bloque + ' &middot; ' + d.provincia + '</span></li>';
+			}).join('') : '<li class="vacio">Nadie con ese nombre</li>';
+			sug.hidden = false; q.setAttribute('aria-expanded', 'true');
+		});
+		q.addEventListener('keydown', function(e){
+			if (sug.hidden || !lista.length) return;
+			if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+				e.preventDefault();
+				act = (act + (e.key === 'ArrowDown' ? 1 : -1) + lista.length) % lista.length;
+				[].forEach.call(sug.children, function(li, i){ li.classList.toggle('act', i === act); });
+			} else if (e.key === 'Enter') {
+				e.preventDefault(); mostrar(lista[act < 0 ? 0 : act]);
+			} else if (e.key === 'Escape') cerrar();
+		});
+		sug.addEventListener('mousedown', function(e){
+			var li = e.target.closest('li[data-i]'); if (li) { e.preventDefault(); mostrar(lista[+li.dataset.i]); }
+		});
+		q.addEventListener('blur', function(){ setTimeout(cerrar, 100); });
 
-		 	var maplayer1=mapsvg.append("g").attr("class","maplayer1");
-		 	var maplayer2=mapsvg.append("g").attr("class","maplayer1");
-		 	var projection = d3.geo.transverseMercator().center([3, -38]).rotate([66, 0])
-		 	.translate([(mapw / 2), (maph / 2)]).scale((maph * 56.5) / 35);
-		 	var mappath = d3.geo.path().projection(projection);
-		 	var aviso=maplayer1.append('text').text('Cargando mapa...').attr('x',(mapw/2)-80).attr('y',maph/2);
-			d3.json("maps/provincias.json", function(json) {//Provincias excepto T. del Fuego
-
-				maplayer1.selectAll("path")
-					.data(json.features)
-					.enter()
-					.append("path")
-					.attr("d", mappath)
-					.attr("id",function(d){return "p"+(d.properties.prov);})
-					.attr("provname",function(d){return (d.properties.provincia);})
-					.attr("class","provincia")
-					.on("mouseover", onMouseOver)
-					.on("mouseout", onMouseOut)
-					.on("click", onClick);
-					aviso.text('');
-			});
-
-			d3.json("maps/TIERRA DEL FUEGO.json", function(json) {//Aqui incorporamos T. del Fuego
-				maplayer2.selectAll("path")
-					.data(json.features)
-					.enter()
-					.append("path")
-					.attr("d", mappath)
-					.attr("id",function(d){return "p"+(d.properties.prov);})
-					.attr("provname",function(d){return (d.properties.PROVINCIA);})
-					.attr("class","provincia")
-					.on("mouseover", onMouseOver)
-					.on("mouseout", onMouseOut)
-					.on("click", onClick);
-			});
-
-			function onClick() {
-				var prov = d3.select(this).attr("id");
-				var provname = d3.select(this).attr("provname");
-				// console.log("onclick!!!", prov);
-				window.location = 'matrix2.html#' + prov.substring(1) + "#" + provname;
-			}
-
-			function onMouseOver() {
-				//Pintar provincia de rojo
-				var prov = d3.selectAll("#" + d3.select(this).attr("id"));
-				selectCurrent(prov);
-
-				//Agregar clase 'current'
-				var lines = d3.selectAll("." + d3.select(this).attr("id"));
-				selectCurrent(lines);
-
-								
-			}
-
-			function onMouseOut() {
-				//Volver al color original
-				var prov = d3.selectAll("#" + d3.select(this).attr("id"));
-				unselectCurrent(prov);
-
-				//Remover classe 'current'
-				var lines = d3.selectAll("." + d3.select(this).attr("id"));
-				unselectCurrent(lines);				
-			}
-
-			function selectCurrent(selection){
-				selection.classed('current', true);
-				// NO usar moveToFront() aqui: reordenar el nodo bajo el cursor durante el
-				// mouseover dispara una cascada de mouseover/mouseout sobre los paths que se
-				// solapan, dejando la clase 'current' (rojo) pegada y tragando el click en
-				// las provincias. El resaltado en rojo via CSS ya distingue el elemento.
-			}
-
-			function unselectCurrent(selection){
-				selection.classed('current', false);
-			}			
-		</script>
-	</body>
-	<script>
-	  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-	  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-	  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-	  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
-
-	  ga('create', 'UA-44984023-1', 'dipvis.org');
-	  ga('send', 'pageview');
-
-	</script>
+		function mostrar(d){
+			if (!d) return;
+			cerrar();
+			q.value = DV.persona(d.nombre);
+			var c = en2026[d.id];
+			eje.foco(null, c ? d.id : null);
+			// trazo chico: su punto ideal año por año
+			var pts = d.points, W = 260, H = 56, x0 = 2022, x1 = 2026;
+			var X = function(a){ return 10 + (a - x0) / (x1 - x0) * (W - 20); }, Y = function(v){ return H / 2 - v / 2.8 * (H / 2 - 6); };
+			var clase = d.col === '#6b9eea' ? 'of' : d.col === '#bbf098' ? 'op' : 'va';
+			var traza = '<svg viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="none">' +
+				'<line x1="0" x2="' + W + '" y1="' + Y(0) + '" y2="' + Y(0) + '" stroke="currentColor" stroke-opacity=".25" stroke-dasharray="3 4"/>' +
+				'<polyline fill="none" stroke-width="2.2" stroke="var(--c-' + clase + ')" points="' + pts.map(function(p){ return X(p.year) + ',' + Y(p.idp); }).join(' ') + '"/>' +
+				pts.map(function(p){ return '<circle r="3" fill="var(--c-' + clase + ')" cx="' + X(p.year) + '" cy="' + Y(p.idp) + '"/>'; }).join('') +
+				'<text x="0" y="' + (H + 12) + '">' + x0 + '</text><text x="' + W + '" y="' + (H + 12) + '" text-anchor="end">' + x1 + '</text>' +
+				'<text x="0" y="8">del lado de LLA</text><text x="0" y="' + (H - 10) + '">opositor</text></svg>';
+			$('#ficha').innerHTML =
+				'<div class="ficha">' +
+				'<img src="2022/' + d.foto + '" alt="">' +
+				'<div><div class="f-n">' + DV.persona(d.nombre) + '</div><div class="f-b">' + d.bloque + '<br>' + d.provincia + '</div></div>' +
+				'<div class="f-traza">' + traza + '</div>' +
+				'<p class="f-com">' + (c ? 'En 2026 est&aacute; en la comunidad <b>C' + c.c + '</b> (punto ideal ' + DV.num(c.x) + ').' : 'No est&aacute; entre los diputados de 2026.') + '</p>' +
+				'<div class="f-ir">' +
+					'<a href="2022/index.html#dips=' + d.id + '">Su trayectoria</a>' +
+					(c ? '<a href="2022/comunidades.html#dip=' + d.id + '">Su comunidad</a>' : '') +
+					'<a href="2022/matrix2.html#' + d.distrito + '#' + d.provincia + '">Su provincia</a>' +
+				'</div></div>';
+		}
+	});
+})();
+</script>
+</body>
 </html>
