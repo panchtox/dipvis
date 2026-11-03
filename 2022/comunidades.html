@@ -213,6 +213,14 @@ window.DIPVIS = {
 
 	function mezcla(a, b, t){ return 'rgb(' + a.map(function(x, i){ return Math.round(x + (b[i] - x) * t); }).join(',') + ')'; }
 	function colorVoto(p){ return p == null ? null : p < .5 ? mezcla(NO, MEDIO, p * 2) : mezcla(MEDIO, SI, (p - .5) * 2); }
+	// cómo votó la comunidad, dicho en palabras: 0 % a favor y «sin votos» se confundían
+	function comoVoto(p){
+		if (p == null) return 'nadie de la comunidad votó sí ni no (ausentes o abstenciones)';
+		if (p === 0) return 'todos en contra';
+		if (p === 1) return 'todos a favor';
+		return Math.round(p * 100) + ' % a favor, ' + (100 - Math.round(p * 100)) + ' % en contra';
+	}
+	function corto(t){ return t.length <= 60 ? t : t.slice(0, 60).replace(/\s+\S*$/, '') + '…'; }
 	function pct(p){ return p == null ? 'sin votos' : Math.round(p * 100) + ' %'; }
 	function esc(s){ return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;'); }
 	function escala(W, H, m){
@@ -258,7 +266,7 @@ window.DIPVIS = {
 				if (p != null) vs.push(p);
 				pts += '<circle class="a' + (c ? '' : ' sv') + '" data-k="' + k + '" cx="' + s.x(a.x).toFixed(0) + '" cy="' + s.y(a.y).toFixed(0) +
 					'" r="7.5" stroke-width="1.5"' + (c ? ' fill="' + c + '"' : ' stroke-dasharray="3 3"') + '><title>O.D. ' + a.od + ' · ' +
-					esc(a.corto || a.s.slice(0, 60)) + ': ' + pct(p) + ' a favor</title></circle>';
+					esc(a.corto || corto(a.s)) + ': ' + comoVoto(p) + '</title></circle>';
 			});
 			var media = vs.reduce(function(x, y){ return x + y; }, 0) / vs.length;
 			return '<figure><figcaption><b>' + g.c + ' &middot; ' + g.rot + '</b><span>a favor en ' + pct(media) +
